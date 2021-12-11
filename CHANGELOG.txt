@@ -1,3 +1,9 @@
+commit 9ce306bbc522217014cb1f707ba65dda1350c519
+Author: Felicitas Pojtinger <felicitas@pojtinger.com>
+Date:   Sat Dec 11 16:46:09 2021 +0100
+
+    feat: Add sections on firewalld
+
 commit 5de9cc519edc59e09a762c876c88c8618423a78d
 Author: Felicitas Pojtinger <felicitas@pojtinger.com>
 Date:   Sat Dec 11 16:38:36 2021 +0100

@@ -41,6 +41,7 @@ Felicitas Pojtinger
 <li><a href="#dns"><span class="toc-section-number">4</span> DNS</a></li>
 <li><a href="#ssh"><span class="toc-section-number">5</span> SSH</a></li>
 <li><a href="#firewalld"><span class="toc-section-number">6</span> firewalld</a></li>
+<li><a href="#apt"><span class="toc-section-number">7</span> APT</a></li>
 </ul>
 </div>
 <div id="introduction" class="slide section level1" number="1">
@@ -79,12 +80,12 @@ sudo umount /dev/mmcblk0{,p1,p0}</code></pre>
 <div id="ipv6" class="slide section level1" number="3">
 <h1 number="3"><span class="header-section-number">3</span> IPv6</h1>
 <pre class="shell"><code>ssh root@jeans-box
-cat &gt;/etc/sysctl.d/privacy.conf &lt;&lt;&#39;EOT&#39;
+tee /etc/sysctl.d/privacy.conf &lt;&lt;&#39;EOT&#39;
 net.ipv6.conf.all.use_tempaddr=2
 EOT
 sysctl -p
 
-cat &gt;/etc/network/interfaces.d/eth0 &lt;&lt;&#39;EOT&#39;
+tee /etc/network/interfaces.d/eth0 &lt;&lt;&#39;EOT&#39;
 auto eth0
 iface eth0 inet dhcp
 
@@ -95,7 +96,7 @@ iface eth0 inet6 static
 EOT
 systemctl restart networking
 
-cat &gt;/etc/resolv.conf &lt;&lt;&#39;EOT&#39;
+tee /etc/resolv.conf &lt;&lt;&#39;EOT&#39;
 nameserver 2606:4700:4700::1111
 nameserver 2606:4700:4700::1001
 EOT
@@ -134,6 +135,22 @@ sudo apt install -y firewalld
 sudo systemctl enable --now firewalld
 sudo firewall-cmd --permanent --add-service=mdns
 sudo firewall-cmd --permanent --add-service=llmnr</code></pre>
+</div>
+<div id="apt" class="slide section level1" number="7">
+<h1 number="7"><span class="header-section-number">7</span> APT</h1>
+<pre class="shell"><code>ssh jean@jeans-box.example.com
+sudo apt update
+sudo apt install -y unattended-upgrades
+
+sudo tee /etc/apt/apt.conf.d/50unattended-upgrades &lt;&lt;&#39;EOT&#39;
+Unattended-Upgrade::Origins-Pattern {
+  &quot;origin=*&quot;;
+}
+Unattended-Upgrade::Automatic-Reboot &quot;true&quot;;
+Unattended-Upgrade::Automatic-Reboot-Time &quot;02:00&quot;;
+EOT
+sudo systemctl enable --now unattended-upgrades
+sudo unattended-upgrades --debug</code></pre>
 </div>
 </body>
 </html>
