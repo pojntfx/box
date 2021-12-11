@@ -29,4 +29,75 @@ SPDX-License-Identifier: AGPL-3.0
 
 \newpage
 
-## OS
+## Debian
+
+```shell
+sudo umount /dev/mmcblk0{,p1,p0}
+curl -L 'https://raspi.debian.net/tested/20210823_raspi_3_bullseye.img.xz' | xzcat >/tmp/debian.img
+sudo dd if=/tmp/debian.img of=/dev/mmcblk0 bs=4M status=progress
+sync
+
+sudo mkdir -p /mnt/raspi-boot
+sudo mount /dev/mmcblk0p1 /mnt/raspi-boot
+{
+    echo "root_pw=$(openssl rand -base64 12)"
+    echo "root_authorized_key=$(cat ~/.ssh/id_rsa.pub)"
+    echo "hostname=jeans-box"
+} >>/mnt/raspi-boot/sysconf.txt
+sudo umount /dev/mmcblk0{,p1,p0}
+```
+
+## IPv6
+
+```shell
+ssh root@jeans-box
+cat >/etc/sysctl.d/privacy.conf <<'EOT'
+net.ipv6.conf.all.use_tempaddr=2
+EOT
+sysctl -p
+
+cat >/etc/network/interfaces.d/eth0 <<'EOT'
+auto eth0
+iface eth0 inet dhcp
+
+iface eth0 inet6 static
+    address 2001:7c7:2121:8d00::3
+    autoconf 1
+    accept_ra 2
+EOT
+systemctl restart networking
+
+cat >/etc/resolv.conf <<'EOT'
+nameserver 2606:4700:4700::1111
+nameserver 2606:4700:4700::1001
+EOT
+sed -i /etc/hosts -e 's/\tlocalhost/\tlocalhost jeans-box/g'
+```
+
+## DNS
+
+```config
+jeans-box     10800   IN      AAAA    2001:7c7:2121:8d00::3
+```
+
+## SSH
+
+```shell
+ssh root@jeans-box.example.com
+apt update
+apt install -y sudo curl openssh-server
+systemctl enable --now ssh
+
+adduser jean
+su jean -c "mkdir -m 700 -p ~/.ssh && curl 'https://github.com/jean.keys' | tee -a ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+usermod -aG sudo jean
+
+echo 'PermitRootLogin no' | tee /etc/ssh/ssh_config.d/no-root.conf
+
+passwd -d root
+passwd -l root
+chsh -s /sbin/nologin
+rm ~/.ssh/authorized_keys
+
+systemctl restart ssh
+```
