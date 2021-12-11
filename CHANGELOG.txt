@@ -1,3 +1,9 @@
+commit 1b5ff366e05dc8c338d58b262faa8bdb86571053
+Author: Felicitas Pojtinger <felicitas@pojtinger.com>
+Date:   Sat Dec 11 16:20:05 2021 +0100
+
+    feat: Add sections on Debian, IPv6, DNS and SSH
+
 commit 48dc3dca1d9f9c6349c89e24ebd0b3eb95d76002
 Author: Felicitas Pojtinger <felicitas@pojtinger.com>
 Date:   Sat Dec 11 14:09:23 2021 +0100

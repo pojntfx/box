@@ -164,7 +164,10 @@
 <li><a href="#contributing"><span class="toc-section-number">1.1.1</span> Contributing</a></li>
 <li><a href="#license"><span class="toc-section-number">1.1.2</span> License</a></li>
 </ul></li>
-<li><a href="#os"><span class="toc-section-number">1.2</span> OS</a></li>
+<li><a href="#debian"><span class="toc-section-number">1.2</span> Debian</a></li>
+<li><a href="#ipv6"><span class="toc-section-number">1.3</span> IPv6</a></li>
+<li><a href="#dns"><span class="toc-section-number">1.4</span> DNS</a></li>
+<li><a href="#ssh"><span class="toc-section-number">1.5</span> SSH</a></li>
 </ul>
 </nav>
 <section id="introduction" data-number="0.1">
@@ -186,8 +189,70 @@
 <p>SPDX-License-Identifier: AGPL-3.0</p>
 </section>
 </section>
-<section id="os" data-number="0.2">
-<h2 data-number="1.2"><span class="header-section-number">1.2</span> OS</h2>
+<section id="debian" data-number="0.2">
+<h2 data-number="1.2"><span class="header-section-number">1.2</span> Debian</h2>
+<pre class="shell"><code>sudo umount /dev/mmcblk0{,p1,p0}
+curl -L &#39;https://raspi.debian.net/tested/20210823_raspi_3_bullseye.img.xz&#39; | xzcat &gt;/tmp/debian.img
+sudo dd if=/tmp/debian.img of=/dev/mmcblk0 bs=4M status=progress
+sync
+
+sudo mkdir -p /mnt/raspi-boot
+sudo mount /dev/mmcblk0p1 /mnt/raspi-boot
+{
+    echo &quot;root_pw=$(openssl rand -base64 12)&quot;
+    echo &quot;root_authorized_key=$(cat ~/.ssh/id_rsa.pub)&quot;
+    echo &quot;hostname=jeans-box&quot;
+} &gt;&gt;/mnt/raspi-boot/sysconf.txt
+sudo umount /dev/mmcblk0{,p1,p0}</code></pre>
+</section>
+<section id="ipv6" data-number="0.3">
+<h2 data-number="1.3"><span class="header-section-number">1.3</span> IPv6</h2>
+<pre class="shell"><code>ssh root@jeans-box
+cat &gt;/etc/sysctl.d/privacy.conf &lt;&lt;&#39;EOT&#39;
+net.ipv6.conf.all.use_tempaddr=2
+EOT
+sysctl -p
+
+cat &gt;/etc/network/interfaces.d/eth0 &lt;&lt;&#39;EOT&#39;
+auto eth0
+iface eth0 inet dhcp
+
+iface eth0 inet6 static
+    address 2001:7c7:2121:8d00::3
+    autoconf 1
+    accept_ra 2
+EOT
+systemctl restart networking
+
+cat &gt;/etc/resolv.conf &lt;&lt;&#39;EOT&#39;
+nameserver 2606:4700:4700::1111
+nameserver 2606:4700:4700::1001
+EOT
+sed -i /etc/hosts -e &#39;s/\tlocalhost/\tlocalhost jeans-box/g&#39;</code></pre>
+</section>
+<section id="dns" data-number="0.4">
+<h2 data-number="1.4"><span class="header-section-number">1.4</span> DNS</h2>
+<pre class="config"><code>jeans-box     10800   IN      AAAA    2001:7c7:2121:8d00::3</code></pre>
+</section>
+<section id="ssh" data-number="0.5">
+<h2 data-number="1.5"><span class="header-section-number">1.5</span> SSH</h2>
+<pre class="shell"><code>ssh root@jeans-box.example.com
+apt update
+apt install -y sudo curl openssh-server
+systemctl enable --now ssh
+
+adduser jean
+su jean -c &quot;mkdir -m 700 -p ~/.ssh &amp;&amp; curl &#39;https://github.com/jean.keys&#39; | tee -a ~/.ssh/authorized_keys &amp;&amp; chmod 600 ~/.ssh/authorized_keys&quot;
+usermod -aG sudo jean
+
+echo &#39;PermitRootLogin no&#39; | tee /etc/ssh/ssh_config.d/no-root.conf
+
+passwd -d root
+passwd -l root
+chsh -s /sbin/nologin
+rm ~/.ssh/authorized_keys
+
+systemctl restart ssh</code></pre>
 </section>
 </body>
 </html>
