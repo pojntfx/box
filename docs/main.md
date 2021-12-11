@@ -78,6 +78,7 @@ sed -i /etc/hosts -e 's/\tlocalhost/\tlocalhost jeans-box/g'
 
 ```config
 jeans-box     10800   IN      AAAA    2001:7c7:2121:8d00::3
+*.jeans-box   10800   IN      AAAA    2001:7c7:2121:8d00::3
 ```
 
 ## SSH
@@ -100,4 +101,15 @@ chsh -s /sbin/nologin
 rm ~/.ssh/authorized_keys
 
 systemctl restart ssh
+```
+
+## firewalld
+
+```shell
+ssh jean@jeans-box.example.com
+sudo apt update
+sudo apt install -y firewalld
+sudo systemctl enable --now firewalld
+sudo firewall-cmd --permanent --add-service=mdns
+sudo firewall-cmd --permanent --add-service=llmnr
 ```
