@@ -9,6 +9,7 @@ Felicitas Pojtinger
 -   3 IPv6
 -   4 DNS
 -   5 SSH
+-   6 firewalld
 
 Introduction
 
@@ -73,6 +74,7 @@ IPv6
 DNS
 
     jeans-box     10800   IN      AAAA    2001:7c7:2121:8d00::3
+    *.jeans-box   10800   IN      AAAA    2001:7c7:2121:8d00::3
 
 SSH
 
@@ -93,3 +95,12 @@ SSH
     rm ~/.ssh/authorized_keys
 
     systemctl restart ssh
+
+firewalld
+
+    ssh jean@jeans-box.example.com
+    sudo apt update
+    sudo apt install -y firewalld
+    sudo systemctl enable --now firewalld
+    sudo firewall-cmd --permanent --add-service=mdns
+    sudo firewall-cmd --permanent --add-service=llmnr
