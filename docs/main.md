@@ -51,12 +51,12 @@ sudo umount /dev/mmcblk0{,p1,p0}
 
 ```shell
 ssh root@jeans-box
-cat >/etc/sysctl.d/privacy.conf <<'EOT'
+tee /etc/sysctl.d/privacy.conf <<'EOT'
 net.ipv6.conf.all.use_tempaddr=2
 EOT
 sysctl -p
 
-cat >/etc/network/interfaces.d/eth0 <<'EOT'
+tee /etc/network/interfaces.d/eth0 <<'EOT'
 auto eth0
 iface eth0 inet dhcp
 
@@ -67,7 +67,7 @@ iface eth0 inet6 static
 EOT
 systemctl restart networking
 
-cat >/etc/resolv.conf <<'EOT'
+tee /etc/resolv.conf <<'EOT'
 nameserver 2606:4700:4700::1111
 nameserver 2606:4700:4700::1001
 EOT
@@ -112,4 +112,22 @@ sudo apt install -y firewalld
 sudo systemctl enable --now firewalld
 sudo firewall-cmd --permanent --add-service=mdns
 sudo firewall-cmd --permanent --add-service=llmnr
+```
+
+## APT
+
+```shell
+ssh jean@jeans-box.example.com
+sudo apt update
+sudo apt install -y unattended-upgrades
+
+sudo tee /etc/apt/apt.conf.d/50unattended-upgrades <<'EOT'
+Unattended-Upgrade::Origins-Pattern {
+  "origin=*";
+}
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+EOT
+sudo systemctl enable --now unattended-upgrades
+sudo unattended-upgrades --debug
 ```
