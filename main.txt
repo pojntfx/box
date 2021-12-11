@@ -1,0 +1,29 @@
+Box
+Felicitas Pojtinger
+2021-12-11
+
+-   1 Introduction
+    -   1.1 Contributing
+    -   1.2 License
+-   2 OS
+
+Introduction
+
+Contributing
+
+Found an error or have a suggestion? Please open an issue on GitHub
+(github.com/pojntfx/box):
+
+[QR-Code to the source code on GitHub]
+
+License
+
+This document and included source code is Free Culture/Free Software.
+
+[Badge of the AGPL-3.0 license]
+
+Box (c) 2021 Felicitas Pojtinger
+
+SPDX-License-Identifier: AGPL-3.0
+
+OS
