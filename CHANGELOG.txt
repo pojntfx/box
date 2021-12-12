@@ -1,3 +1,9 @@
+commit 802516393b9f9afaeb68c86f0e6794e95558a89c
+Author: Felicitas Pojtinger <felicitas@pojtinger.com>
+Date:   Sun Dec 12 16:21:31 2021 +0100
+
+    feat: Add sections on Traefik
+
 commit 9ce306bbc522217014cb1f707ba65dda1350c519
 Author: Felicitas Pojtinger <felicitas@pojtinger.com>
 Date:   Sat Dec 11 16:46:09 2021 +0100
