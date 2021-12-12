@@ -1,3 +1,9 @@
+commit 260cc877c4f033cf272dad94ef676843785e0414
+Author: Felicitas Pojtinger <felicitas@pojtinger.com>
+Date:   Sun Dec 12 19:14:53 2021 +0100
+
+    feat: Add section on bofied
+
 commit ae985d1bc974b1b87c5e9987b3b0b60695a1f867
 Author: Felicitas Pojtinger <felicitas@pojtinger.com>
 Date:   Sun Dec 12 19:00:11 2021 +0100

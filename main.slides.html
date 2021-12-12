@@ -47,6 +47,7 @@ Felicitas Pojtinger
 <li><a href="#gitea"><span class="toc-section-number">10</span> Gitea</a></li>
 <li><a href="#dex"><span class="toc-section-number">11</span> Dex</a></li>
 <li><a href="#liwasc"><span class="toc-section-number">12</span> liwasc</a></li>
+<li><a href="#bofied"><span class="toc-section-number">13</span> bofied</a></li>
 </ul>
 </div>
 <div id="introduction" class="slide section level1" number="1">
@@ -289,6 +290,15 @@ http:
       service: liwasc
       entryPoints:
         - websecure
+    bofied:
+      rule: Host(`bofied.jeans-box.example.com`)
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: bofied.jeans-box.example.com
+      service: bofied
+      entryPoints:
+        - websecure
 
   middlewares:
     dashboard:
@@ -314,6 +324,10 @@ http:
       loadBalancer:
         servers:
           - url: http://localhost:15124
+    bofied:
+      loadBalancer:
+        servers:
+          - url: http://localhost:15256
 
   serversTransports:
     cockpit:
@@ -413,7 +427,23 @@ sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image
 <h1 number="12"><span class="header-section-number">12</span> liwasc</h1>
 <pre class="shell"><code>sudo mkdir -p /var/lib/liwasc
 sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net host --cap-add NET_RAW --ulimit nofile=16384:16384 -v /var/lib/liwasc:/root/.local/share/liwasc -e LIWASC_BACKEND_OIDCISSUER=https://dex.jeans-box.example.com -e LIWASC_BACKEND_OIDCCLIENTID=liwasc -e LIWASC_BACKEND_DEVICENAME=eth0 -e LIWASC_BACKEND_PERIODICSCANCRONEXPRESSION=&#39;0 0 * * *&#39; --name liwasc pojntfx/liwasc-backend</code></pre>
-<p>Now visit <a href="https://pojntfx.github.io/liwasc/">https://pojntfx.github.io/liwasc/</a> as we did before and use <code>wss:://liwasc.jeans-box.example.com/</code> as the backend URL (note the trailing slash!).</p>
+<p>Now visit <a href="https://pojntfx.github.io/liwasc/">https://pojntfx.github.io/liwasc/</a> as we did before and use <code>wss://liwasc.jeans-box.example.com/</code> as the backend URL (note the trailing slash!).</p>
+</div>
+<div id="bofied" class="slide section level1" number="13">
+<h1 number="13"><span class="header-section-number">13</span> bofied</h1>
+<pre class="shell"><code>sudo mkdir -p /var/lib/bofied
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net host --cap-add NET_BIND_SERVICE -v /var/lib/bofied:/root/.local/share/bofied -e BOFIED_BACKEND_OIDCISSUER=https://dex.felicias-box.alphahorizon.io -e BOFIED_BACKEND_OIDCCLIENTID=bofied -e BOFIED_BACKEND_ADVERTISEDIP=100.64.154.249 --name bofied pojntfx/bofied-backend
+sudo firewall-cmd --permanent --add-port=67/udp
+sudo firewall-cmd --permanent --add-port=69/udp
+sudo firewall-cmd --permanent --add-port=4011/udp
+sudo firewall-cmd --reload</code></pre>
+<p>Now visit <a href="https://pojntfx.github.io/bofied/">https://pojntfx.github.io/bofied/</a> and login using the following credentials:</p>
+<ul>
+<li>Backend URL: <code>https://bofied.jeans-box.example.com/</code></li>
+<li>OIDC Issuer: <code>https://dex.jeans-box.example.com</code></li>
+<li>OIDC Client ID: <code>bofied</code></li>
+<li>OIDC Redirect URL: <code>https://pojntfx.github.io/bofied/</code></li>
+</ul>
 </div>
 </body>
 </html>
