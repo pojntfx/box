@@ -46,6 +46,7 @@ Felicitas Pojtinger
 <li><a href="#cockpit"><span class="toc-section-number">9</span> Cockpit</a></li>
 <li><a href="#gitea"><span class="toc-section-number">10</span> Gitea</a></li>
 <li><a href="#dex"><span class="toc-section-number">11</span> Dex</a></li>
+<li><a href="#liwasc"><span class="toc-section-number">12</span> liwasc</a></li>
 </ul>
 </div>
 <div id="introduction" class="slide section level1" number="1">
@@ -279,6 +280,15 @@ http:
       service: dex
       entryPoints:
         - websecure
+    liwasc:
+      rule: Host(`liwasc.jeans-box.example.com`)
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: liwasc.jeans-box.example.com
+      service: liwasc
+      entryPoints:
+        - websecure
 
   middlewares:
     dashboard:
@@ -300,6 +310,10 @@ http:
       loadBalancer:
         servers:
           - url: http://localhost:5556
+    liwasc:
+      loadBalancer:
+        servers:
+          - url: http://localhost:15124
 
   serversTransports:
     cockpit:
@@ -385,15 +399,21 @@ connectors:
           redirectURI: https://dex.jeans-box.example.com/callback
           baseURL: https://gitea.jeans-box.example.com
 EOT
-sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 5556:5556 -v /var/lib/dex:/var/dex -v /etc/dex:/etc/dex --name dex -it ghcr.io/dexidp/dex dex serve /etc/dex/config.yaml</code></pre>
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 5556:5556 -v /var/lib/dex:/var/dex -v /etc/dex:/etc/dex --name dex ghcr.io/dexidp/dex dex serve /etc/dex/config.yaml</code></pre>
 <p>You can test it out by visiting <a href="https://pojntfx.github.io/liwasc/">https://pojntfx.github.io/liwasc/</a> and trying to log in using the following credentials:</p>
 <ul>
-<li>Backend URL: <code>ws://example.com</code> (we’ll set this later; this is just to try out the login)</li>
+<li>Backend URL: <code>ws://example.com/</code> (we’ll set this later; this is just to try out the login)</li>
 <li>OIDC Issuer: <code>https://dex.jeans-box.example.com</code></li>
 <li>OIDC Client ID: <code>liwasc</code></li>
 <li>OIDC Redirect URL: <code>https://pojntfx.github.io/liwasc/</code></li>
 </ul>
 <p>And authorization prompt from Gitea and Dex should show up, after which liwasc’s home page should load (showing an error like <code>Failed to construct &#39;WebSocket&#39;: An insecure WebSocket connection may not be initiated from a page loaded over HTTPS.</code>).</p>
+</div>
+<div id="liwasc" class="slide section level1" number="12">
+<h1 number="12"><span class="header-section-number">12</span> liwasc</h1>
+<pre class="shell"><code>sudo mkdir -p /var/lib/liwasc
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net host --cap-add NET_RAW --ulimit nofile=16384:16384 -v /var/lib/liwasc:/root/.local/share/liwasc -e LIWASC_BACKEND_OIDCISSUER=https://dex.jeans-box.example.com -e LIWASC_BACKEND_OIDCCLIENTID=liwasc -e LIWASC_BACKEND_DEVICENAME=eth0 -e LIWASC_BACKEND_PERIODICSCANCRONEXPRESSION=&#39;0 0 * * *&#39; --name liwasc pojntfx/liwasc-backend</code></pre>
+<p>Now visit <a href="https://pojntfx.github.io/liwasc/">https://pojntfx.github.io/liwasc/</a> as we did before and use <code>wss:://liwasc.jeans-box.example.com/</code> as the backend URL (note the trailing slash!).</p>
 </div>
 </body>
 </html>

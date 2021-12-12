@@ -1,3 +1,9 @@
+commit ae985d1bc974b1b87c5e9987b3b0b60695a1f867
+Author: Felicitas Pojtinger <felicitas@pojtinger.com>
+Date:   Sun Dec 12 19:00:11 2021 +0100
+
+    feat: Add section on liwasc
+
 commit 01e93cffd52c93e689f11f239d4e2eb7895afad2
 Author: Felicitas Pojtinger <felicitas@pojtinger.com>
 Date:   Sun Dec 12 18:42:07 2021 +0100
