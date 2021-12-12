@@ -256,6 +256,15 @@ http:
       service: dex
       entryPoints:
         - websecure
+    liwasc:
+      rule: Host(`liwasc.jeans-box.example.com`)
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: liwasc.jeans-box.example.com
+      service: liwasc
+      entryPoints:
+        - websecure
 
   middlewares:
     dashboard:
@@ -277,6 +286,10 @@ http:
       loadBalancer:
         servers:
           - url: http://localhost:5556
+    liwasc:
+      loadBalancer:
+        servers:
+          - url: http://localhost:15124
 
   serversTransports:
     cockpit:
@@ -370,14 +383,23 @@ connectors:
           redirectURI: https://dex.jeans-box.example.com/callback
           baseURL: https://gitea.jeans-box.example.com
 EOT
-sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 5556:5556 -v /var/lib/dex:/var/dex -v /etc/dex:/etc/dex --name dex -it ghcr.io/dexidp/dex dex serve /etc/dex/config.yaml
+sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 5556:5556 -v /var/lib/dex:/var/dex -v /etc/dex:/etc/dex --name dex ghcr.io/dexidp/dex dex serve /etc/dex/config.yaml
 ```
 
 You can test it out by visiting [https://pojntfx.github.io/liwasc/](https://pojntfx.github.io/liwasc/) and trying to log in using the following credentials:
 
-- Backend URL: `ws://example.com` (we'll set this later; this is just to try out the login)
+- Backend URL: `ws://example.com/` (we'll set this later; this is just to try out the login)
 - OIDC Issuer: `https://dex.jeans-box.example.com`
 - OIDC Client ID: `liwasc`
 - OIDC Redirect URL: `https://pojntfx.github.io/liwasc/`
 
 And authorization prompt from Gitea and Dex should show up, after which liwasc's home page should load (showing an error like `Failed to construct 'WebSocket': An insecure WebSocket connection may not be initiated from a page loaded over HTTPS.`).
+
+## liwasc
+
+```shell
+sudo mkdir -p /var/lib/liwasc
+sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net host --cap-add NET_RAW --ulimit nofile=16384:16384 -v /var/lib/liwasc:/root/.local/share/liwasc -e LIWASC_BACKEND_OIDCISSUER=https://dex.jeans-box.example.com -e LIWASC_BACKEND_OIDCCLIENTID=liwasc -e LIWASC_BACKEND_DEVICENAME=eth0 -e LIWASC_BACKEND_PERIODICSCANCRONEXPRESSION='0 0 * * *' --name liwasc pojntfx/liwasc-backend
+```
+
+Now visit [https://pojntfx.github.io/liwasc/](https://pojntfx.github.io/liwasc/) as we did before and use `wss:://liwasc.jeans-box.example.com/` as the backend URL (note the trailing slash!).
