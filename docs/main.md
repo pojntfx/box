@@ -265,6 +265,15 @@ http:
       service: liwasc
       entryPoints:
         - websecure
+    bofied:
+      rule: Host(`bofied.jeans-box.example.com`)
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: bofied.jeans-box.example.com
+      service: bofied
+      entryPoints:
+        - websecure
 
   middlewares:
     dashboard:
@@ -290,6 +299,10 @@ http:
       loadBalancer:
         servers:
           - url: http://localhost:15124
+    bofied:
+      loadBalancer:
+        servers:
+          - url: http://localhost:15256
 
   serversTransports:
     cockpit:
@@ -402,4 +415,22 @@ sudo mkdir -p /var/lib/liwasc
 sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net host --cap-add NET_RAW --ulimit nofile=16384:16384 -v /var/lib/liwasc:/root/.local/share/liwasc -e LIWASC_BACKEND_OIDCISSUER=https://dex.jeans-box.example.com -e LIWASC_BACKEND_OIDCCLIENTID=liwasc -e LIWASC_BACKEND_DEVICENAME=eth0 -e LIWASC_BACKEND_PERIODICSCANCRONEXPRESSION='0 0 * * *' --name liwasc pojntfx/liwasc-backend
 ```
 
-Now visit [https://pojntfx.github.io/liwasc/](https://pojntfx.github.io/liwasc/) as we did before and use `wss:://liwasc.jeans-box.example.com/` as the backend URL (note the trailing slash!).
+Now visit [https://pojntfx.github.io/liwasc/](https://pojntfx.github.io/liwasc/) as we did before and use `wss://liwasc.jeans-box.example.com/` as the backend URL (note the trailing slash!).
+
+## bofied
+
+```shell
+sudo mkdir -p /var/lib/bofied
+sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net host --cap-add NET_BIND_SERVICE -v /var/lib/bofied:/root/.local/share/bofied -e BOFIED_BACKEND_OIDCISSUER=https://dex.felicias-box.alphahorizon.io -e BOFIED_BACKEND_OIDCCLIENTID=bofied -e BOFIED_BACKEND_ADVERTISEDIP=100.64.154.249 --name bofied pojntfx/bofied-backend
+sudo firewall-cmd --permanent --add-port=67/udp
+sudo firewall-cmd --permanent --add-port=69/udp
+sudo firewall-cmd --permanent --add-port=4011/udp
+sudo firewall-cmd --reload
+```
+
+Now visit [https://pojntfx.github.io/bofied/](https://pojntfx.github.io/bofied/) and login using the following credentials:
+
+- Backend URL: `https://bofied.jeans-box.example.com/`
+- OIDC Issuer: `https://dex.jeans-box.example.com`
+- OIDC Client ID: `bofied`
+- OIDC Redirect URL: `https://pojntfx.github.io/bofied/`
