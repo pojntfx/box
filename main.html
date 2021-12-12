@@ -173,6 +173,7 @@
 <li><a href="#traefik"><span class="toc-section-number">1.8</span> Traefik</a></li>
 <li><a href="#cockpit"><span class="toc-section-number">1.9</span> Cockpit</a></li>
 <li><a href="#gitea"><span class="toc-section-number">1.10</span> Gitea</a></li>
+<li><a href="#dex"><span class="toc-section-number">1.11</span> Dex</a></li>
 </ul>
 </nav>
 <section id="introduction" data-number="0.1">
@@ -443,14 +444,14 @@ sudo firewall-cmd --permanent --add-port=8443/tcp
 sudo firewall-cmd --reload
 
 curl -Lu jean:asdf https://traefik.jeans-box.example.com/ # Test the Traefik dashboard
-ssh -p 8443 pojntfx@jeans-box.example.com # Test SSH over TCP
-ssh -o ProxyCommand=&quot;openssl s_client -connect ssh.jeans-box.example.com:443 -quiet&quot; pojntfx # Test SSH over TLS</code></pre>
+ssh -p 8443 jean@jeans-box.example.com # Test SSH over TCP
+ssh -o ProxyCommand=&quot;openssl s_client -connect ssh.jeans-box.example.com:443 -quiet&quot; jean # Test SSH over TLS</code></pre>
 </section>
 <section id="cockpit" data-number="0.9">
 <h2 data-number="1.9"><span class="header-section-number">1.9</span> Cockpit</h2>
 <pre class="shell"><code>echo &#39;deb http://deb.debian.org/debian bullseye-backports main&#39; | sudo tee /etc/apt/sources.list.d/backports.list
 sudo apt update
-sudo apt install -t bullseye-backports -y cockpit cockpit-podman
+sudo apt install -t bullseye-backports -y cockpit cockpit-podman cockpit-pcp
 
 curl https://cockpit.jeans-box.example.com/ # Test Cockpit</code></pre>
 </section>
@@ -466,12 +467,63 @@ curl https://gitea.jeans-box.example.com/ # Test Cockpit</code></pre>
 <ul>
 <li>SSH Server Domain: gitea.jeans-box.example.com</li>
 <li>SSH Server Port: 2222</li>
-<li>Gitea Base URL: https://gitea.felicias-box.alphahorizon.io/</li>
+<li>Gitea Base URL: https://gitea.jeans-box.example.com/</li>
 <li>Use your email SMTP server in <code>Email Settings</code>, enable <code>Email Notifications</code> and <code>Require Email Confirmation to Register</code></li>
 <li>Under <code>Server and Third-Party Service Settings</code>, enable <code>Disable Self-Registration</code> (if you want to prevent others from using Gitea)</li>
 <li>Under <code>Administrator Account Settings</code>, create your admin account</li>
 </ul>
 <p>Note that the installation might take a while (about 1 minute)</p>
+</section>
+<section id="dex" data-number="0.11">
+<h2 data-number="1.11"><span class="header-section-number">1.11</span> Dex</h2>
+<p>First, setup Gitea by visiting <a href="https://gitea.jeans-box.example.com/user/settings/applications" class="uri">https://gitea.jeans-box.example.com/user/settings/applications</a> and adding a new OAuth2 application with Application Name <code>Dex</code> and Redirect URI <code>https://dex.jeans-box.example.com/callback</code>. Note the client ID and client secret; we’ll need them in the following.</p>
+<pre class="shell"><code>sudo mkdir -p /etc/dex
+sudo mkdir -p /var/lib/dex
+sudo touch /var/lib/dex/dex.db
+sudo chown -R 1001:1001 /var/lib/dex/
+sudo tee /etc/dex/config.yaml&lt;&lt;&#39;EOT&#39;
+issuer: https://dex.jeans-box.example.com
+
+storage:
+    type: sqlite3
+    config:
+        file: /var/dex/dex.db
+
+web:
+    http: 0.0.0.0:5556
+    allowedOrigins: [&#39;*&#39;]
+
+staticClients:
+    - id: liwasc
+      redirectURIs:
+          - https://pojntfx.github.io/liwasc/
+      name: &quot;liwasc&quot;
+      public: true
+    - id: bofied
+      redirectURIs:
+          - https://pojntfx.github.io/bofied/
+      name: &quot;bofied&quot;
+      public: true
+
+connectors:
+    - type: gitea
+      id: gitea
+      name: Gitea
+      config:
+          clientID: yourclientidfromgiteahere
+          clientSecret: yourclientsecretfromgiteahere
+          redirectURI: https://dex.jeans-box.example.com/callback
+          baseURL: https://gitea.jeans-box.example.com
+EOT
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 5556:5556 -v /var/lib/dex:/var/dex -v /etc/dex:/etc/dex --name dex -it ghcr.io/dexidp/dex dex serve /etc/dex/config.yaml</code></pre>
+<p>You can test it out by visiting <a href="https://pojntfx.github.io/liwasc/" class="uri">https://pojntfx.github.io/liwasc/</a> and trying to log in using the following credentials:</p>
+<ul>
+<li>Backend URL: <code>ws://example.com</code> (we’ll set this later; this is just to try out the login)</li>
+<li>OIDC Issuer: <code>https://dex.jeans-box.example.com</code></li>
+<li>OIDC Client ID: <code>liwasc</code></li>
+<li>OIDC Redirect URL: <code>https://pojntfx.github.io/liwasc/</code></li>
+</ul>
+<p>And authorization prompt from Gitea and Dex should show up, after which liwasc’s home page should load (showing an error like <code>Failed to construct &#39;WebSocket&#39;: An insecure WebSocket connection may not be initiated from a page loaded over HTTPS.</code>).</p>
 </section>
 </body>
 </html>
