@@ -86,8 +86,13 @@ jeans-box     10800   IN      AAAA    2001:7c7:2121:8d00::3
 ```shell
 ssh root@jeans-box.example.com
 apt update
-apt install -y sudo curl openssh-server
+apt install -y sudo curl openssh-server locales
 systemctl enable --now ssh
+
+echo "LC_ALL=en_US.UTF-8" | tee -a /etc/environment
+echo "en_US.UTF-8 UTF-8" | tee /etc/locale.gen
+echo "LANG=en_US.UTF-8" | tee /etc/locale.conf
+locale-gen en_US.UTF-8
 
 adduser jean
 su jean -c "mkdir -m 700 -p ~/.ssh && curl 'https://github.com/jean.keys' | tee -a ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
@@ -110,8 +115,10 @@ ssh jean@jeans-box.example.com
 sudo apt update
 sudo apt install -y firewalld
 sudo systemctl enable --now firewalld
+sudo firewall-cmd --zone=public --add-interface=eth0 --permanent
 sudo firewall-cmd --permanent --add-service=mdns
 sudo firewall-cmd --permanent --add-service=llmnr
+sudo firewall-cmd --reload
 ```
 
 ## APT
@@ -137,8 +144,8 @@ sudo unattended-upgrades --debug
 ```shell
 ssh jean@jeans-box.example.com
 sudo apt update
-sudo apt install -y docker.io
-sudo systemctl enable --now docker
+sudo apt install -y podman
+echo 'unqualified-search-registries=["docker.io"]' | sudo tee /etc/containers/registries.conf.d/docker.conf
 
 sudo mkdir -p /etc/traefik
 sudo tee /etc/traefik/traefik.yaml<<'EOT'
@@ -262,13 +269,24 @@ http:
       insecureSkipVerify: true
 EOT
 
-sudo docker run -d --restart=always --net=host -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
+sudo podman run -d --restart=always --net=host -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
 
 sudo firewall-cmd --permanent --add-service=http
 sudo firewall-cmd --permanent --add-service=https
 sudo firewall-cmd --permanent --add-port=8443/tcp
+sudo firewall-cmd --reload
 
 curl -Lu jean:asdf https://traefik.jeans-box.example.com/ # Test the Traefik dashboard
 ssh -p 8443 pojntfx@jeans-box.example.com # Test SSH over TCP
 ssh -o ProxyCommand="openssl s_client -connect ssh.jeans-box.example.com:443 -quiet" pojntfx # Test SSH over TLS
+```
+
+## Cockpit
+
+```shell
+echo 'deb http://deb.debian.org/debian bullseye-backports main' | sudo tee /etc/apt/sources.list.d/backports.list
+sudo apt update
+sudo apt install -t bullseye-backports -y cockpit cockpit-podman
+
+curl https://cockpit.jeans-box.example.com/ # Test Cockpit
 ```
