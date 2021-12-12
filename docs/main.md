@@ -71,6 +71,7 @@ tee /etc/resolv.conf <<'EOT'
 nameserver 2606:4700:4700::1111
 nameserver 2606:4700:4700::1001
 EOT
+chattr +i /etc/resolv.conf
 sed -i /etc/hosts -e 's/\tlocalhost/\tlocalhost jeans-box/g'
 ```
 
@@ -157,6 +158,9 @@ entryPoints:
   websecure:
     address: ":443"
 
+  sshalt:
+    address: ":2222"
+
   websecurealt:
     address: ":8443"
 
@@ -188,6 +192,11 @@ tcp:
         - websecurealt
       rule: HostSNI(`*`)
       service: ssh
+    giteaSSH:
+      entryPoints:
+        - sshalt
+      rule: HostSNI(`*`)
+      service: giteaSSH
     sshOverTLS:
       entryPoints:
         - websecure
@@ -202,6 +211,10 @@ tcp:
       loadBalancer:
         servers:
           - address: localhost:22
+    giteaSSH:
+      loadBalancer:
+        servers:
+          - address: localhost:3022
 
 http:
   routers:
@@ -291,3 +304,25 @@ sudo apt install -t bullseye-backports -y cockpit cockpit-podman
 
 curl https://cockpit.jeans-box.example.com/ # Test Cockpit
 ```
+
+## Gitea
+
+```shell
+sudo mkdir -p /var/lib/gitea
+sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 3000:3000 -p 3022:22 -v /var/lib/gitea/:/data -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -e 'USER_UID=1000' -e 'USER_GID=1000' --name gitea gitea/gitea
+sudo firewall-cmd --permanent --add-port=2222/tcp
+sudo firewall-cmd --reload
+
+curl https://gitea.jeans-box.example.com/ # Test Cockpit
+```
+
+Now visit [https://gitea.jeans-box.example.com/](https://gitea.jeans-box.example.com/) and run the Wizard; use the following values:
+
+- SSH Server Domain: gitea.jeans-box.example.com
+- SSH Server Port: 2222
+- Gitea Base URL: https://gitea.felicias-box.alphahorizon.io/
+- Use your email SMTP server in `Email Settings`, enable `Email Notifications` and `Require Email Confirmation to Register`
+- Under `Server and Third-Party Service Settings`, enable `Disable Self-Registration` (if you want to prevent others from using Gitea)
+- Under `Administrator Account Settings`, create your admin account
+
+Note that the installation might take a while (about 1 minute)
