@@ -172,6 +172,7 @@
 <li><a href="#apt"><span class="toc-section-number">1.7</span> APT</a></li>
 <li><a href="#traefik"><span class="toc-section-number">1.8</span> Traefik</a></li>
 <li><a href="#cockpit"><span class="toc-section-number">1.9</span> Cockpit</a></li>
+<li><a href="#gitea"><span class="toc-section-number">1.10</span> Gitea</a></li>
 </ul>
 </nav>
 <section id="introduction" data-number="0.1">
@@ -232,6 +233,7 @@ tee /etc/resolv.conf &lt;&lt;&#39;EOT&#39;
 nameserver 2606:4700:4700::1111
 nameserver 2606:4700:4700::1001
 EOT
+chattr +i /etc/resolv.conf
 sed -i /etc/hosts -e &#39;s/\tlocalhost/\tlocalhost jeans-box/g&#39;</code></pre>
 </section>
 <section id="dns" data-number="0.4">
@@ -308,6 +310,9 @@ entryPoints:
   websecure:
     address: &quot;:443&quot;
 
+  sshalt:
+    address: &quot;:2222&quot;
+
   websecurealt:
     address: &quot;:8443&quot;
 
@@ -339,6 +344,11 @@ tcp:
         - websecurealt
       rule: HostSNI(`*`)
       service: ssh
+    giteaSSH:
+      entryPoints:
+        - sshalt
+      rule: HostSNI(`*`)
+      service: giteaSSH
     sshOverTLS:
       entryPoints:
         - websecure
@@ -353,6 +363,10 @@ tcp:
       loadBalancer:
         servers:
           - address: localhost:22
+    giteaSSH:
+      loadBalancer:
+        servers:
+          - address: localhost:3022
 
 http:
   routers:
@@ -439,6 +453,25 @@ sudo apt update
 sudo apt install -t bullseye-backports -y cockpit cockpit-podman
 
 curl https://cockpit.jeans-box.example.com/ # Test Cockpit</code></pre>
+</section>
+<section id="gitea" data-number="0.10">
+<h2 data-number="1.10"><span class="header-section-number">1.10</span> Gitea</h2>
+<pre class="shell"><code>sudo mkdir -p /var/lib/gitea
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 3000:3000 -p 3022:22 -v /var/lib/gitea/:/data -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -e &#39;USER_UID=1000&#39; -e &#39;USER_GID=1000&#39; --name gitea gitea/gitea
+sudo firewall-cmd --permanent --add-port=2222/tcp
+sudo firewall-cmd --reload
+
+curl https://gitea.jeans-box.example.com/ # Test Cockpit</code></pre>
+<p>Now visit <a href="https://gitea.jeans-box.example.com/" class="uri">https://gitea.jeans-box.example.com/</a> and run the Wizard; use the following values:</p>
+<ul>
+<li>SSH Server Domain: gitea.jeans-box.example.com</li>
+<li>SSH Server Port: 2222</li>
+<li>Gitea Base URL: https://gitea.felicias-box.alphahorizon.io/</li>
+<li>Use your email SMTP server in <code>Email Settings</code>, enable <code>Email Notifications</code> and <code>Require Email Confirmation to Register</code></li>
+<li>Under <code>Server and Third-Party Service Settings</code>, enable <code>Disable Self-Registration</code> (if you want to prevent others from using Gitea)</li>
+<li>Under <code>Administrator Account Settings</code>, create your admin account</li>
+</ul>
+<p>Note that the installation might take a while (about 1 minute)</p>
 </section>
 </body>
 </html>
