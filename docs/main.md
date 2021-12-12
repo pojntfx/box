@@ -146,6 +146,7 @@ ssh jean@jeans-box.example.com
 sudo apt update
 sudo apt install -y podman
 echo 'unqualified-search-registries=["docker.io"]' | sudo tee /etc/containers/registries.conf.d/docker.conf
+sudo systemctl enable --now podman-auto-update.timer
 
 sudo mkdir -p /etc/traefik
 sudo tee /etc/traefik/traefik.yaml<<'EOT'
@@ -269,7 +270,7 @@ http:
       insecureSkipVerify: true
 EOT
 
-sudo podman run -d --restart=always --net=host -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
+sudo podman run -d --restart=always --net=host --label "io.containers.autoupdate=image" -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
 
 sudo firewall-cmd --permanent --add-service=http
 sudo firewall-cmd --permanent --add-service=https
