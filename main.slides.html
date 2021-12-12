@@ -43,6 +43,7 @@ Felicitas Pojtinger
 <li><a href="#firewalld"><span class="toc-section-number">6</span> firewalld</a></li>
 <li><a href="#apt"><span class="toc-section-number">7</span> APT</a></li>
 <li><a href="#traefik"><span class="toc-section-number">8</span> Traefik</a></li>
+<li><a href="#cockpit"><span class="toc-section-number">9</span> Cockpit</a></li>
 </ul>
 </div>
 <div id="introduction" class="slide section level1" number="1">
@@ -112,8 +113,13 @@ sed -i /etc/hosts -e &#39;s/\tlocalhost/\tlocalhost jeans-box/g&#39;</code></pre
 <h1 number="5"><span class="header-section-number">5</span> SSH</h1>
 <pre class="shell"><code>ssh root@jeans-box.example.com
 apt update
-apt install -y sudo curl openssh-server
+apt install -y sudo curl openssh-server locales
 systemctl enable --now ssh
+
+echo &quot;LC_ALL=en_US.UTF-8&quot; | tee -a /etc/environment
+echo &quot;en_US.UTF-8 UTF-8&quot; | tee /etc/locale.gen
+echo &quot;LANG=en_US.UTF-8&quot; | tee /etc/locale.conf
+locale-gen en_US.UTF-8
 
 adduser jean
 su jean -c &quot;mkdir -m 700 -p ~/.ssh &amp;&amp; curl &#39;https://github.com/jean.keys&#39; | tee -a ~/.ssh/authorized_keys &amp;&amp; chmod 600 ~/.ssh/authorized_keys&quot;
@@ -134,8 +140,10 @@ systemctl restart ssh</code></pre>
 sudo apt update
 sudo apt install -y firewalld
 sudo systemctl enable --now firewalld
+sudo firewall-cmd --zone=public --add-interface=eth0 --permanent
 sudo firewall-cmd --permanent --add-service=mdns
-sudo firewall-cmd --permanent --add-service=llmnr</code></pre>
+sudo firewall-cmd --permanent --add-service=llmnr
+sudo firewall-cmd --reload</code></pre>
 </div>
 <div id="apt" class="slide section level1" number="7">
 <h1 number="7"><span class="header-section-number">7</span> APT</h1>
@@ -157,8 +165,8 @@ sudo unattended-upgrades --debug</code></pre>
 <h1 number="8"><span class="header-section-number">8</span> Traefik</h1>
 <pre class="shell"><code>ssh jean@jeans-box.example.com
 sudo apt update
-sudo apt install -y docker.io
-sudo systemctl enable --now docker
+sudo apt install -y podman
+echo &#39;unqualified-search-registries=[&quot;docker.io&quot;]&#39; | sudo tee /etc/containers/registries.conf.d/docker.conf
 
 sudo mkdir -p /etc/traefik
 sudo tee /etc/traefik/traefik.yaml&lt;&lt;&#39;EOT&#39;
@@ -282,15 +290,24 @@ http:
       insecureSkipVerify: true
 EOT
 
-sudo docker run -d --restart=always --net=host -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
+sudo podman run -d --restart=always --net=host -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
 
 sudo firewall-cmd --permanent --add-service=http
 sudo firewall-cmd --permanent --add-service=https
 sudo firewall-cmd --permanent --add-port=8443/tcp
+sudo firewall-cmd --reload
 
 curl -Lu jean:asdf https://traefik.jeans-box.example.com/ # Test the Traefik dashboard
 ssh -p 8443 pojntfx@jeans-box.example.com # Test SSH over TCP
 ssh -o ProxyCommand=&quot;openssl s_client -connect ssh.jeans-box.example.com:443 -quiet&quot; pojntfx # Test SSH over TLS</code></pre>
+</div>
+<div id="cockpit" class="slide section level1" number="9">
+<h1 number="9"><span class="header-section-number">9</span> Cockpit</h1>
+<pre class="shell"><code>echo &#39;deb http://deb.debian.org/debian bullseye-backports main&#39; | sudo tee /etc/apt/sources.list.d/backports.list
+sudo apt update
+sudo apt install -t bullseye-backports -y cockpit cockpit-podman
+
+curl https://cockpit.jeans-box.example.com/ # Test Cockpit</code></pre>
 </div>
 </body>
 </html>
