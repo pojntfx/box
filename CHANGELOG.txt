@@ -1,3 +1,9 @@
+commit c5beb8812b73d52022fe6df6b7bff3de686a5a54
+Author: Felicitas Pojtinger <felicitas@pojtinger.com>
+Date:   Sun Dec 12 17:07:12 2021 +0100
+
+    feat: Automatic updates to Podman
+
 commit 36b01b6e0489a2dd72e7cc3c9f7a9e51d48f2144
 Author: Felicitas Pojtinger <felicitas@pojtinger.com>
 Date:   Sun Dec 12 17:01:07 2021 +0100
