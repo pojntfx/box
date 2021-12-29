@@ -140,15 +140,25 @@ sudo systemctl enable --now unattended-upgrades
 sudo unattended-upgrades --debug
 ```
 
-## Traefik
+## Podman
 
 ```shell
 ssh jean@jeans-box.example.com
+echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/ /' | sudo tee /etc/apt/sources.list.d/libcontainers.list
+curl -L "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/Release.key" | sudo apt-key add -
 sudo apt update
-sudo apt install -y podman
+sudo apt upgrade -y # Prevent conflicts with eventual prior Podman install from Debian repos
+sudo apt install -t Debian_11 -y podman
 echo 'unqualified-search-registries=["docker.io"]' | sudo tee /etc/containers/registries.conf.d/docker.conf
+sudo systemctl unmask podman-auto-update.service
+sudo systemctl unmask podman-auto-update.timer
 sudo systemctl enable --now podman-auto-update.timer
+sudo systemctl enable --now podman-restart
+```
 
+## Traefik
+
+```shell
 sudo mkdir -p /etc/traefik
 sudo tee /etc/traefik/traefik.yaml<<'EOT'
 entryPoints:
@@ -309,7 +319,10 @@ http:
       insecureSkipVerify: true
 EOT
 
-sudo podman run -d --restart=always --net=host --label "io.containers.autoupdate=image" -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
+sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net=host -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
+sudo podman generate systemd --new traefik | sudo tee /lib/systemd/system/traefik.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now traefik
 
 sudo firewall-cmd --permanent --add-service=http
 sudo firewall-cmd --permanent --add-service=https
@@ -336,6 +349,9 @@ curl https://cockpit.jeans-box.example.com/ # Test Cockpit
 ```shell
 sudo mkdir -p /var/lib/gitea
 sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 3000:3000 -p 3022:22 -v /var/lib/gitea/:/data -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -e 'USER_UID=1000' -e 'USER_GID=1000' --name gitea gitea/gitea
+sudo podman generate systemd --new gitea | sudo tee /lib/systemd/system/gitea.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now gitea
 sudo firewall-cmd --permanent --add-port=2222/tcp
 sudo firewall-cmd --reload
 
@@ -397,6 +413,9 @@ connectors:
           baseURL: https://gitea.jeans-box.example.com
 EOT
 sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 5556:5556 -v /var/lib/dex:/var/dex -v /etc/dex:/etc/dex --name dex ghcr.io/dexidp/dex dex serve /etc/dex/config.yaml
+sudo podman generate systemd --new dex | sudo tee /lib/systemd/system/dex.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now dex
 ```
 
 You can test it out by visiting [https://pojntfx.github.io/liwasc/](https://pojntfx.github.io/liwasc/) and trying to log in using the following credentials:
@@ -413,6 +432,9 @@ And authorization prompt from Gitea and Dex should show up, after which liwasc's
 ```shell
 sudo mkdir -p /var/lib/liwasc
 sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net host --cap-add NET_RAW --ulimit nofile=16384:16384 -v /var/lib/liwasc:/root/.local/share/liwasc -e LIWASC_BACKEND_OIDCISSUER=https://dex.jeans-box.example.com -e LIWASC_BACKEND_OIDCCLIENTID=liwasc -e LIWASC_BACKEND_DEVICENAME=eth0 -e LIWASC_BACKEND_PERIODICSCANCRONEXPRESSION='0 0 * * *' --name liwasc pojntfx/liwasc-backend
+sudo podman generate systemd --new liwasc | sudo tee /lib/systemd/system/liwasc.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now liwasc
 ```
 
 Now visit [https://pojntfx.github.io/liwasc/](https://pojntfx.github.io/liwasc/) as we did before and use `wss://liwasc.jeans-box.example.com/` as the backend URL (note the trailing slash!).
@@ -421,7 +443,10 @@ Now visit [https://pojntfx.github.io/liwasc/](https://pojntfx.github.io/liwasc/)
 
 ```shell
 sudo mkdir -p /var/lib/bofied
-sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net host --cap-add NET_BIND_SERVICE -v /var/lib/bofied:/root/.local/share/bofied -e BOFIED_BACKEND_OIDCISSUER=https://dex.felicias-box.alphahorizon.io -e BOFIED_BACKEND_OIDCCLIENTID=bofied -e BOFIED_BACKEND_ADVERTISEDIP=100.64.154.249 --name bofied pojntfx/bofied-backend
+sudo podman run -d --restart=always --label "io.containers.autoupdate=image" --net host --cap-add NET_BIND_SERVICE -v /var/lib/bofied:/root/.local/share/bofied -e BOFIED_BACKEND_OIDCISSUER=https://dex.jeans-box.example.com -e BOFIED_BACKEND_OIDCCLIENTID=bofied -e BOFIED_BACKEND_ADVERTISEDIP=100.64.154.249 --name bofied pojntfx/bofied-backend
+sudo podman generate systemd --new bofied | sudo tee /lib/systemd/system/bofied.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now bofied
 sudo firewall-cmd --permanent --add-port=67/udp
 sudo firewall-cmd --permanent --add-port=69/udp
 sudo firewall-cmd --permanent --add-port=4011/udp
