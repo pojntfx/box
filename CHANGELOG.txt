@@ -1,3 +1,9 @@
+commit b20a07771fc4c60be7160f85900022ed338a4d5c
+Author: Felicitas Pojtinger <felicitas@pojtinger.com>
+Date:   Wed Dec 29 21:09:00 2021 +0100
+
+    refactor: Use systemd to supervise Podman image updates
+
 commit 260cc877c4f033cf272dad94ef676843785e0414
 Author: Felicitas Pojtinger <felicitas@pojtinger.com>
 Date:   Sun Dec 12 19:14:53 2021 +0100

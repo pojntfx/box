@@ -170,12 +170,13 @@
 <li><a href="#ssh"><span class="toc-section-number">1.5</span> SSH</a></li>
 <li><a href="#firewalld"><span class="toc-section-number">1.6</span> firewalld</a></li>
 <li><a href="#apt"><span class="toc-section-number">1.7</span> APT</a></li>
-<li><a href="#traefik"><span class="toc-section-number">1.8</span> Traefik</a></li>
-<li><a href="#cockpit"><span class="toc-section-number">1.9</span> Cockpit</a></li>
-<li><a href="#gitea"><span class="toc-section-number">1.10</span> Gitea</a></li>
-<li><a href="#dex"><span class="toc-section-number">1.11</span> Dex</a></li>
-<li><a href="#liwasc"><span class="toc-section-number">1.12</span> liwasc</a></li>
-<li><a href="#bofied"><span class="toc-section-number">1.13</span> bofied</a></li>
+<li><a href="#podman"><span class="toc-section-number">1.8</span> Podman</a></li>
+<li><a href="#traefik"><span class="toc-section-number">1.9</span> Traefik</a></li>
+<li><a href="#cockpit"><span class="toc-section-number">1.10</span> Cockpit</a></li>
+<li><a href="#gitea"><span class="toc-section-number">1.11</span> Gitea</a></li>
+<li><a href="#dex"><span class="toc-section-number">1.12</span> Dex</a></li>
+<li><a href="#liwasc"><span class="toc-section-number">1.13</span> liwasc</a></li>
+<li><a href="#bofied"><span class="toc-section-number">1.14</span> bofied</a></li>
 </ul>
 </nav>
 <section id="introduction" data-number="0.1">
@@ -296,15 +297,23 @@ EOT
 sudo systemctl enable --now unattended-upgrades
 sudo unattended-upgrades --debug</code></pre>
 </section>
-<section id="traefik" data-number="0.8">
-<h2 data-number="1.8"><span class="header-section-number">1.8</span> Traefik</h2>
+<section id="podman" data-number="0.8">
+<h2 data-number="1.8"><span class="header-section-number">1.8</span> Podman</h2>
 <pre class="shell"><code>ssh jean@jeans-box.example.com
+echo &#39;deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/ /&#39; | sudo tee /etc/apt/sources.list.d/libcontainers.list
+curl -L &quot;https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/Release.key&quot; | sudo apt-key add -
 sudo apt update
-sudo apt install -y podman
+sudo apt upgrade -y # Prevent conflicts with eventual prior Podman install from Debian repos
+sudo apt install -t Debian_11 -y podman
 echo &#39;unqualified-search-registries=[&quot;docker.io&quot;]&#39; | sudo tee /etc/containers/registries.conf.d/docker.conf
+sudo systemctl unmask podman-auto-update.service
+sudo systemctl unmask podman-auto-update.timer
 sudo systemctl enable --now podman-auto-update.timer
-
-sudo mkdir -p /etc/traefik
+sudo systemctl enable --now podman-restart</code></pre>
+</section>
+<section id="traefik" data-number="0.9">
+<h2 data-number="1.9"><span class="header-section-number">1.9</span> Traefik</h2>
+<pre class="shell"><code>sudo mkdir -p /etc/traefik
 sudo tee /etc/traefik/traefik.yaml&lt;&lt;&#39;EOT&#39;
 entryPoints:
   web:
@@ -464,7 +473,10 @@ http:
       insecureSkipVerify: true
 EOT
 
-sudo podman run -d --restart=always --net=host --label &quot;io.containers.autoupdate=image&quot; -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net=host -v /var/lib/traefik/:/var/lib/traefik -v /etc/traefik/:/etc/traefik --name traefik traefik
+sudo podman generate systemd --new traefik | sudo tee /lib/systemd/system/traefik.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now traefik
 
 sudo firewall-cmd --permanent --add-service=http
 sudo firewall-cmd --permanent --add-service=https
@@ -475,18 +487,21 @@ curl -Lu jean:asdf https://traefik.jeans-box.example.com/ # Test the Traefik das
 ssh -p 8443 jean@jeans-box.example.com # Test SSH over TCP
 ssh -o ProxyCommand=&quot;openssl s_client -connect ssh.jeans-box.example.com:443 -quiet&quot; jean # Test SSH over TLS</code></pre>
 </section>
-<section id="cockpit" data-number="0.9">
-<h2 data-number="1.9"><span class="header-section-number">1.9</span> Cockpit</h2>
+<section id="cockpit" data-number="0.10">
+<h2 data-number="1.10"><span class="header-section-number">1.10</span> Cockpit</h2>
 <pre class="shell"><code>echo &#39;deb http://deb.debian.org/debian bullseye-backports main&#39; | sudo tee /etc/apt/sources.list.d/backports.list
 sudo apt update
 sudo apt install -t bullseye-backports -y cockpit cockpit-podman cockpit-pcp
 
 curl https://cockpit.jeans-box.example.com/ # Test Cockpit</code></pre>
 </section>
-<section id="gitea" data-number="0.10">
-<h2 data-number="1.10"><span class="header-section-number">1.10</span> Gitea</h2>
+<section id="gitea" data-number="0.11">
+<h2 data-number="1.11"><span class="header-section-number">1.11</span> Gitea</h2>
 <pre class="shell"><code>sudo mkdir -p /var/lib/gitea
 sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 3000:3000 -p 3022:22 -v /var/lib/gitea/:/data -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -e &#39;USER_UID=1000&#39; -e &#39;USER_GID=1000&#39; --name gitea gitea/gitea
+sudo podman generate systemd --new gitea | sudo tee /lib/systemd/system/gitea.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now gitea
 sudo firewall-cmd --permanent --add-port=2222/tcp
 sudo firewall-cmd --reload
 
@@ -502,8 +517,8 @@ curl https://gitea.jeans-box.example.com/ # Test Cockpit</code></pre>
 </ul>
 <p>Note that the installation might take a while (about 1 minute)</p>
 </section>
-<section id="dex" data-number="0.11">
-<h2 data-number="1.11"><span class="header-section-number">1.11</span> Dex</h2>
+<section id="dex" data-number="0.12">
+<h2 data-number="1.12"><span class="header-section-number">1.12</span> Dex</h2>
 <p>First, setup Gitea by visiting <a href="https://gitea.jeans-box.example.com/user/settings/applications" class="uri">https://gitea.jeans-box.example.com/user/settings/applications</a> and adding a new OAuth2 application with Application Name <code>Dex</code> and Redirect URI <code>https://dex.jeans-box.example.com/callback</code>. Note the client ID and client secret; we’ll need them in the following.</p>
 <pre class="shell"><code>sudo mkdir -p /etc/dex
 sudo mkdir -p /var/lib/dex
@@ -543,7 +558,10 @@ connectors:
           redirectURI: https://dex.jeans-box.example.com/callback
           baseURL: https://gitea.jeans-box.example.com
 EOT
-sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 5556:5556 -v /var/lib/dex:/var/dex -v /etc/dex:/etc/dex --name dex ghcr.io/dexidp/dex dex serve /etc/dex/config.yaml</code></pre>
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 5556:5556 -v /var/lib/dex:/var/dex -v /etc/dex:/etc/dex --name dex ghcr.io/dexidp/dex dex serve /etc/dex/config.yaml
+sudo podman generate systemd --new dex | sudo tee /lib/systemd/system/dex.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now dex</code></pre>
 <p>You can test it out by visiting <a href="https://pojntfx.github.io/liwasc/" class="uri">https://pojntfx.github.io/liwasc/</a> and trying to log in using the following credentials:</p>
 <ul>
 <li>Backend URL: <code>ws://example.com/</code> (we’ll set this later; this is just to try out the login)</li>
@@ -553,16 +571,22 @@ sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image
 </ul>
 <p>And authorization prompt from Gitea and Dex should show up, after which liwasc’s home page should load (showing an error like <code>Failed to construct &#39;WebSocket&#39;: An insecure WebSocket connection may not be initiated from a page loaded over HTTPS.</code>).</p>
 </section>
-<section id="liwasc" data-number="0.12">
-<h2 data-number="1.12"><span class="header-section-number">1.12</span> liwasc</h2>
+<section id="liwasc" data-number="0.13">
+<h2 data-number="1.13"><span class="header-section-number">1.13</span> liwasc</h2>
 <pre class="shell"><code>sudo mkdir -p /var/lib/liwasc
-sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net host --cap-add NET_RAW --ulimit nofile=16384:16384 -v /var/lib/liwasc:/root/.local/share/liwasc -e LIWASC_BACKEND_OIDCISSUER=https://dex.jeans-box.example.com -e LIWASC_BACKEND_OIDCCLIENTID=liwasc -e LIWASC_BACKEND_DEVICENAME=eth0 -e LIWASC_BACKEND_PERIODICSCANCRONEXPRESSION=&#39;0 0 * * *&#39; --name liwasc pojntfx/liwasc-backend</code></pre>
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net host --cap-add NET_RAW --ulimit nofile=16384:16384 -v /var/lib/liwasc:/root/.local/share/liwasc -e LIWASC_BACKEND_OIDCISSUER=https://dex.jeans-box.example.com -e LIWASC_BACKEND_OIDCCLIENTID=liwasc -e LIWASC_BACKEND_DEVICENAME=eth0 -e LIWASC_BACKEND_PERIODICSCANCRONEXPRESSION=&#39;0 0 * * *&#39; --name liwasc pojntfx/liwasc-backend
+sudo podman generate systemd --new liwasc | sudo tee /lib/systemd/system/liwasc.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now liwasc</code></pre>
 <p>Now visit <a href="https://pojntfx.github.io/liwasc/" class="uri">https://pojntfx.github.io/liwasc/</a> as we did before and use <code>wss://liwasc.jeans-box.example.com/</code> as the backend URL (note the trailing slash!).</p>
 </section>
-<section id="bofied" data-number="0.13">
-<h2 data-number="1.13"><span class="header-section-number">1.13</span> bofied</h2>
+<section id="bofied" data-number="0.14">
+<h2 data-number="1.14"><span class="header-section-number">1.14</span> bofied</h2>
 <pre class="shell"><code>sudo mkdir -p /var/lib/bofied
-sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net host --cap-add NET_BIND_SERVICE -v /var/lib/bofied:/root/.local/share/bofied -e BOFIED_BACKEND_OIDCISSUER=https://dex.felicias-box.alphahorizon.io -e BOFIED_BACKEND_OIDCCLIENTID=bofied -e BOFIED_BACKEND_ADVERTISEDIP=100.64.154.249 --name bofied pojntfx/bofied-backend
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net host --cap-add NET_BIND_SERVICE -v /var/lib/bofied:/root/.local/share/bofied -e BOFIED_BACKEND_OIDCISSUER=https://dex.jeans-box.example.com -e BOFIED_BACKEND_OIDCCLIENTID=bofied -e BOFIED_BACKEND_ADVERTISEDIP=100.64.154.249 --name bofied pojntfx/bofied-backend
+sudo podman generate systemd --new bofied | sudo tee /lib/systemd/system/bofied.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now bofied
 sudo firewall-cmd --permanent --add-port=67/udp
 sudo firewall-cmd --permanent --add-port=69/udp
 sudo firewall-cmd --permanent --add-port=4011/udp
