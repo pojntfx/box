@@ -1,0 +1,10 @@
+[book]
+authors = ["Felicitas Pojtinger"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Box"
+description = "Setup for my personal (pet) server."
+
+[build]
+build-dir = "out"
