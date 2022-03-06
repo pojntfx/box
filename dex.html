@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - Box</title>
+        <title>Dex - Box</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="Setup for my personal (pet) server.">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html" class="active">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">System</li><li class="chapter-item expanded "><a href="debian.html"><strong aria-hidden="true">1.</strong> Debian</a></li><li class="chapter-item expanded "><a href="network.html"><strong aria-hidden="true">2.</strong> Network</a></li><li class="chapter-item expanded "><a href="user.html"><strong aria-hidden="true">3.</strong> User</a></li><li class="chapter-item expanded "><a href="ssh.html"><strong aria-hidden="true">4.</strong> SSH</a></li><li class="chapter-item expanded "><a href="firewalld.html"><strong aria-hidden="true">5.</strong> firewalld</a></li><li class="chapter-item expanded "><a href="apt.html"><strong aria-hidden="true">6.</strong> APT</a></li><li class="chapter-item expanded "><a href="podman.html"><strong aria-hidden="true">7.</strong> Podman</a></li><li class="chapter-item expanded "><a href="traefik.html"><strong aria-hidden="true">8.</strong> Traefik</a></li><li class="chapter-item expanded "><a href="cockpit.html"><strong aria-hidden="true">9.</strong> Cockpit</a></li><li class="chapter-item expanded affix "><li class="part-title">Services</li><li class="chapter-item expanded "><a href="gitea.html"><strong aria-hidden="true">10.</strong> Gitea</a></li><li class="chapter-item expanded "><a href="dex.html"><strong aria-hidden="true">11.</strong> Dex</a></li><li class="chapter-item expanded "><a href="liwasc.html"><strong aria-hidden="true">12.</strong> liwasc</a></li><li class="chapter-item expanded "><a href="bofied.html"><strong aria-hidden="true">13.</strong> bofied</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">System</li><li class="chapter-item expanded "><a href="debian.html"><strong aria-hidden="true">1.</strong> Debian</a></li><li class="chapter-item expanded "><a href="network.html"><strong aria-hidden="true">2.</strong> Network</a></li><li class="chapter-item expanded "><a href="user.html"><strong aria-hidden="true">3.</strong> User</a></li><li class="chapter-item expanded "><a href="ssh.html"><strong aria-hidden="true">4.</strong> SSH</a></li><li class="chapter-item expanded "><a href="firewalld.html"><strong aria-hidden="true">5.</strong> firewalld</a></li><li class="chapter-item expanded "><a href="apt.html"><strong aria-hidden="true">6.</strong> APT</a></li><li class="chapter-item expanded "><a href="podman.html"><strong aria-hidden="true">7.</strong> Podman</a></li><li class="chapter-item expanded "><a href="traefik.html"><strong aria-hidden="true">8.</strong> Traefik</a></li><li class="chapter-item expanded "><a href="cockpit.html"><strong aria-hidden="true">9.</strong> Cockpit</a></li><li class="chapter-item expanded affix "><li class="part-title">Services</li><li class="chapter-item expanded "><a href="gitea.html"><strong aria-hidden="true">10.</strong> Gitea</a></li><li class="chapter-item expanded "><a href="dex.html" class="active"><strong aria-hidden="true">11.</strong> Dex</a></li><li class="chapter-item expanded "><a href="liwasc.html"><strong aria-hidden="true">12.</strong> liwasc</a></li><li class="chapter-item expanded "><a href="bofied.html"><strong aria-hidden="true">13.</strong> bofied</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -134,21 +134,77 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="box"><a class="header" href="#box">Box</a></h1>
-<p>Setup for my personal (pet) server.</p>
-<h2 id="contributing"><a class="header" href="#contributing">Contributing</a></h2>
-<p><strong>Found an error or have a suggestion?</strong> Please open an issue on GitHub (<a href="https://github.com/pojntfx/box">github.com/pojntfx/box</a>):</p>
-<p>If you like the docs, a GitHub star is always appreciated :)</p>
-<h2 id="license"><a class="header" href="#license">License</a></h2>
-<p><img src="https://www.gnu.org/graphics/agplv3-155x51.png" alt="AGPL-3.0 license badge" /></p>
-<p>Box (c) 2022 Felicitas Pojtinger and contributors</p>
-<p>SPDX-License-Identifier: AGPL-3.0</p>
+                        <h1 id="dex"><a class="header" href="#dex">Dex</a></h1>
+<p>Dex is an identity service that uses OpenID Connect to drive authentication for other apps<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
+<p>First, setup Gitea by visiting <a href="https://gitea.sdi-1.alphahorizon.io/user/settings/applications">https://gitea.sdi-1.alphahorizon.io/user/settings/applications</a> and adding a new OAuth2 application with Application Name <code>Dex</code> and Redirect URI <code>https://dex.sdi-1.alphahorizon.io/callback</code>. Note the client ID and client secret; we'll need them in the following.</p>
+<pre><code class="language-shell">ssh jean@sdi-1.alphahorizon.io
+
+sudo mkdir -p /etc/dex /var/lib/dex
+
+sudo touch /var/lib/dex/dex.db
+sudo chown -R 1001:1001 /var/lib/dex/
+
+sudo tee /etc/dex/config.yaml&lt;&lt;'EOT'
+issuer: https://dex.sdi-1.alphahorizon.io
+
+storage:
+    type: sqlite3
+    config:
+        file: /var/dex/dex.db
+
+web:
+    http: 0.0.0.0:5556
+    allowedOrigins: ['*']
+
+staticClients:
+    - id: liwasc
+      redirectURIs:
+          - https://pojntfx.github.io/liwasc/
+      name: &quot;liwasc&quot;
+      public: true
+    - id: bofied
+      redirectURIs:
+          - https://pojntfx.github.io/bofied/
+      name: &quot;bofied&quot;
+      public: true
+
+connectors:
+    - type: gitea
+      id: gitea
+      name: Gitea
+      config:
+          clientID: yourclientidfromgiteahere
+          clientSecret: yourclientsecretfromgiteahere
+          redirectURI: https://dex.sdi-1.alphahorizon.io/callback
+          baseURL: https://gitea.sdi-1.alphahorizon.io
+EOT
+
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 5556:5556 -v /var/lib/dex:/var/dex -v /etc/dex:/etc/dex --name dex ghcr.io/dexidp/dex dex serve /etc/dex/config.yaml
+sudo podman generate systemd --new dex | sudo tee /lib/systemd/system/dex.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now dex
+</code></pre>
+<p>You can test it out by visiting <a href="https://pojntfx.github.io/liwasc/">https://pojntfx.github.io/liwasc/</a> and trying to log in using the following credentials:</p>
+<ul>
+<li>Backend URL: <code>ws://example.com/</code> (we'll set this later; this is just to try out the login)</li>
+<li>OIDC Issuer: <code>https://dex.sdi-1.alphahorizon.io</code></li>
+<li>OIDC Client ID: <code>liwasc</code></li>
+<li>OIDC Redirect URL: <code>https://pojntfx.github.io/liwasc/</code></li>
+</ul>
+<p>And authorization prompt from Gitea and Dex should show up, after which liwasc's home page should load (showing an error like <code>Failed to construct 'WebSocket': An insecure WebSocket connection may not be initiated from a page loaded over HTTPS.</code>).</p>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p>From the Dex website, last checked 2022-02-19 (<a href="https://dexidp.io/">https://dexidp.io/</a>)</p>
+</div>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="next" href="debian.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="prev" href="gitea.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="liwasc.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         <div style="clear: both"></div>
@@ -157,7 +213,10 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="next" href="debian.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="prev" href="gitea.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="liwasc.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
