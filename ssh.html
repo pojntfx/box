@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">System</li><li class="chapter-item expanded "><a href="debian.html"><strong aria-hidden="true">1.</strong> Debian</a></li><li class="chapter-item expanded "><a href="network.html"><strong aria-hidden="true">2.</strong> Network</a></li><li class="chapter-item expanded "><a href="user.html"><strong aria-hidden="true">3.</strong> User</a></li><li class="chapter-item expanded "><a href="ssh.html" class="active"><strong aria-hidden="true">4.</strong> SSH</a></li><li class="chapter-item expanded "><a href="firewalld.html"><strong aria-hidden="true">5.</strong> firewalld</a></li><li class="chapter-item expanded "><a href="apt.html"><strong aria-hidden="true">6.</strong> APT</a></li><li class="chapter-item expanded "><a href="podman.html"><strong aria-hidden="true">7.</strong> Podman</a></li><li class="chapter-item expanded "><a href="traefik.html"><strong aria-hidden="true">8.</strong> Traefik</a></li><li class="chapter-item expanded "><a href="cockpit.html"><strong aria-hidden="true">9.</strong> Cockpit</a></li><li class="chapter-item expanded affix "><li class="part-title">Services</li><li class="chapter-item expanded "><a href="gitea.html"><strong aria-hidden="true">10.</strong> Gitea</a></li><li class="chapter-item expanded "><a href="dex.html"><strong aria-hidden="true">11.</strong> Dex</a></li><li class="chapter-item expanded "><a href="liwasc.html"><strong aria-hidden="true">12.</strong> liwasc</a></li><li class="chapter-item expanded "><a href="bofied.html"><strong aria-hidden="true">13.</strong> bofied</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Base System</li><li class="chapter-item expanded "><a href="sd_card.html"><strong aria-hidden="true">1.</strong> SD Card</a></li><li class="chapter-item expanded "><a href="wireless_networking.html"><strong aria-hidden="true">2.</strong> Wireless Networking</a></li><li class="chapter-item expanded "><a href="wired_networking.html"><strong aria-hidden="true">3.</strong> Wired Networking</a></li><li class="chapter-item expanded "><a href="dns.html"><strong aria-hidden="true">4.</strong> DNS</a></li><li class="chapter-item expanded affix "><li class="part-title">System Services</li><li class="chapter-item expanded "><a href="ssh.html" class="active"><strong aria-hidden="true">5.</strong> SSH</a></li><li class="chapter-item expanded "><a href="firewalld.html"><strong aria-hidden="true">6.</strong> firewalld</a></li><li class="chapter-item expanded "><a href="apt.html"><strong aria-hidden="true">7.</strong> APT</a></li><li class="chapter-item expanded "><a href="podman.html"><strong aria-hidden="true">8.</strong> Podman</a></li><li class="chapter-item expanded "><a href="traefik.html"><strong aria-hidden="true">9.</strong> Traefik</a></li><li class="chapter-item expanded "><a href="cockpit.html"><strong aria-hidden="true">10.</strong> Cockpit</a></li><li class="chapter-item expanded affix "><li class="part-title">Applications</li><li class="chapter-item expanded "><a href="gitea.html"><strong aria-hidden="true">11.</strong> Gitea</a></li><li class="chapter-item expanded "><a href="dex.html"><strong aria-hidden="true">12.</strong> Dex</a></li><li class="chapter-item expanded "><a href="liwasc.html"><strong aria-hidden="true">13.</strong> liwasc</a></li><li class="chapter-item expanded "><a href="bofied.html"><strong aria-hidden="true">14.</strong> bofied</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -135,34 +135,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="ssh"><a class="header" href="#ssh">SSH</a></h1>
-<p>The Secure Shell Protocol (SSH) is a cryptographic network protocol for operating network services securely over an unsecured network<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
-<blockquote>
-<p>Run on both <code>sdi-1</code> and <code>sdi-2</code>; adjust the values accordingly.</p>
-</blockquote>
-<pre><code class="language-shell">ssh root@sdi-1.alphahorizon.io
-
-apt update
-apt install -y sudo curl openssh-server locales
-systemctl enable --now ssh
-
-echo 'PermitRootLogin no' | tee /etc/ssh/ssh_config.d/no-root.conf
-
-passwd -d root
-passwd -l root
-chsh -s /sbin/nologin
-rm ~/.ssh/authorized_keys
-
-systemctl restart ssh
-</code></pre>
-<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
-<p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Secure_Shell">https://en.wikipedia.org/wiki/Secure_Shell</a>)</p>
-</div>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="user.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="dns.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                             <a rel="next" href="firewalld.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
@@ -174,7 +152,7 @@ systemctl restart ssh
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="user.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="dns.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                     <a rel="next" href="firewalld.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
