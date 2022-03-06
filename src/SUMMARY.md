@@ -4,7 +4,7 @@
 
 # Base System
 
-- [SD Card](./sd_card.md)
+- [Linux](./linux.md)
 - [Wireless Networking](./wireless_networking.md)
 - [Wired Networking](./wired_networking.md)
 - [DNS](./dns.md)
