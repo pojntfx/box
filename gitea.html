@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">System</li><li class="chapter-item expanded "><a href="debian.html"><strong aria-hidden="true">1.</strong> Debian</a></li><li class="chapter-item expanded "><a href="network.html"><strong aria-hidden="true">2.</strong> Network</a></li><li class="chapter-item expanded "><a href="user.html"><strong aria-hidden="true">3.</strong> User</a></li><li class="chapter-item expanded "><a href="ssh.html"><strong aria-hidden="true">4.</strong> SSH</a></li><li class="chapter-item expanded "><a href="firewalld.html"><strong aria-hidden="true">5.</strong> firewalld</a></li><li class="chapter-item expanded "><a href="apt.html"><strong aria-hidden="true">6.</strong> APT</a></li><li class="chapter-item expanded "><a href="podman.html"><strong aria-hidden="true">7.</strong> Podman</a></li><li class="chapter-item expanded "><a href="traefik.html"><strong aria-hidden="true">8.</strong> Traefik</a></li><li class="chapter-item expanded "><a href="cockpit.html"><strong aria-hidden="true">9.</strong> Cockpit</a></li><li class="chapter-item expanded affix "><li class="part-title">Services</li><li class="chapter-item expanded "><a href="gitea.html" class="active"><strong aria-hidden="true">10.</strong> Gitea</a></li><li class="chapter-item expanded "><a href="dex.html"><strong aria-hidden="true">11.</strong> Dex</a></li><li class="chapter-item expanded "><a href="liwasc.html"><strong aria-hidden="true">12.</strong> liwasc</a></li><li class="chapter-item expanded "><a href="bofied.html"><strong aria-hidden="true">13.</strong> bofied</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Base System</li><li class="chapter-item expanded "><a href="sd_card.html"><strong aria-hidden="true">1.</strong> SD Card</a></li><li class="chapter-item expanded "><a href="wireless_networking.html"><strong aria-hidden="true">2.</strong> Wireless Networking</a></li><li class="chapter-item expanded "><a href="wired_networking.html"><strong aria-hidden="true">3.</strong> Wired Networking</a></li><li class="chapter-item expanded "><a href="dns.html"><strong aria-hidden="true">4.</strong> DNS</a></li><li class="chapter-item expanded affix "><li class="part-title">System Services</li><li class="chapter-item expanded "><a href="ssh.html"><strong aria-hidden="true">5.</strong> SSH</a></li><li class="chapter-item expanded "><a href="firewalld.html"><strong aria-hidden="true">6.</strong> firewalld</a></li><li class="chapter-item expanded "><a href="apt.html"><strong aria-hidden="true">7.</strong> APT</a></li><li class="chapter-item expanded "><a href="podman.html"><strong aria-hidden="true">8.</strong> Podman</a></li><li class="chapter-item expanded "><a href="traefik.html"><strong aria-hidden="true">9.</strong> Traefik</a></li><li class="chapter-item expanded "><a href="cockpit.html"><strong aria-hidden="true">10.</strong> Cockpit</a></li><li class="chapter-item expanded affix "><li class="part-title">Applications</li><li class="chapter-item expanded "><a href="gitea.html" class="active"><strong aria-hidden="true">11.</strong> Gitea</a></li><li class="chapter-item expanded "><a href="dex.html"><strong aria-hidden="true">12.</strong> Dex</a></li><li class="chapter-item expanded "><a href="liwasc.html"><strong aria-hidden="true">13.</strong> liwasc</a></li><li class="chapter-item expanded "><a href="bofied.html"><strong aria-hidden="true">14.</strong> bofied</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -135,36 +135,6 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="gitea"><a class="header" href="#gitea">Gitea</a></h1>
-<p>Gitea is an open-source forge software package for hosting software development version control using Git as well as other collaborative features like bug tracking, wikis and code review<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
-<pre><code class="language-shell">ssh jean@sdi-1.alphahorizon.io
-
-sudo mkdir -p /var/lib/gitea
-
-sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net slirp4netns:allow_host_loopback=true,enable_ipv6=true -p 3000:3000 -p 3022:22 -v /var/lib/gitea/:/data -v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro -e 'USER_UID=1000' -e 'USER_GID=1000' --name gitea gitea/gitea
-sudo podman generate systemd --new gitea | sudo tee /lib/systemd/system/gitea.service
-
-sudo systemctl daemon-reload
-sudo systemctl enable --now gitea
-
-sudo firewall-cmd --permanent --add-port=2222/tcp
-sudo firewall-cmd --reload
-
-curl https://gitea.sdi-1.alphahorizon.io/ # Test Gitea
-</code></pre>
-<p>Visit <a href="https://gitea.sdi-1.alphahorizon.io/">https://gitea.sdi-1.alphahorizon.io/</a> and run the Wizard; use the following values:</p>
-<ul>
-<li>Site Title: Jean's Gitea</li>
-<li>SSH Server Domain: gitea.sdi-1.alphahorizon.io</li>
-<li>SSH Server Port: 2222</li>
-<li>Gitea Base URL: https://gitea.sdi-1.alphahorizon.io/</li>
-<li>Use your email SMTP server in <code>Email Settings</code>, enable <code>Email Notifications</code> and <code>Require Email Confirmation to Register</code></li>
-<li>Under <code>Server and Third-Party Service Settings</code>, enable <code>Disable Self-Registration</code> (if you want to prevent others from using Gitea)</li>
-<li>Under <code>Administrator Account Settings</code>, create your admin account</li>
-</ul>
-<p>Note that the installation might take a while (about 1 minute)</p>
-<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
-<p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Gitea">https://en.wikipedia.org/wiki/Gitea</a>)</p>
-</div>
 
                     </main>
 
