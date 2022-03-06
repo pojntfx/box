@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>SD Card - Box</title>
+        <title>Linux - Box</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="Setup for my personal (pet) server.">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Base System</li><li class="chapter-item expanded "><a href="sd_card.html" class="active"><strong aria-hidden="true">1.</strong> SD Card</a></li><li class="chapter-item expanded "><a href="wireless_networking.html"><strong aria-hidden="true">2.</strong> Wireless Networking</a></li><li class="chapter-item expanded "><a href="wired_networking.html"><strong aria-hidden="true">3.</strong> Wired Networking</a></li><li class="chapter-item expanded "><a href="dns.html"><strong aria-hidden="true">4.</strong> DNS</a></li><li class="chapter-item expanded affix "><li class="part-title">System Services</li><li class="chapter-item expanded "><a href="ssh.html"><strong aria-hidden="true">5.</strong> SSH</a></li><li class="chapter-item expanded "><a href="firewalld.html"><strong aria-hidden="true">6.</strong> firewalld</a></li><li class="chapter-item expanded "><a href="apt.html"><strong aria-hidden="true">7.</strong> APT</a></li><li class="chapter-item expanded "><a href="podman.html"><strong aria-hidden="true">8.</strong> Podman</a></li><li class="chapter-item expanded "><a href="traefik.html"><strong aria-hidden="true">9.</strong> Traefik</a></li><li class="chapter-item expanded "><a href="cockpit.html"><strong aria-hidden="true">10.</strong> Cockpit</a></li><li class="chapter-item expanded affix "><li class="part-title">Applications</li><li class="chapter-item expanded "><a href="gitea.html"><strong aria-hidden="true">11.</strong> Gitea</a></li><li class="chapter-item expanded "><a href="dex.html"><strong aria-hidden="true">12.</strong> Dex</a></li><li class="chapter-item expanded "><a href="liwasc.html"><strong aria-hidden="true">13.</strong> liwasc</a></li><li class="chapter-item expanded "><a href="bofied.html"><strong aria-hidden="true">14.</strong> bofied</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Base System</li><li class="chapter-item expanded "><a href="linux.html" class="active"><strong aria-hidden="true">1.</strong> Linux</a></li><li class="chapter-item expanded "><a href="wireless_networking.html"><strong aria-hidden="true">2.</strong> Wireless Networking</a></li><li class="chapter-item expanded "><a href="wired_networking.html"><strong aria-hidden="true">3.</strong> Wired Networking</a></li><li class="chapter-item expanded "><a href="dns.html"><strong aria-hidden="true">4.</strong> DNS</a></li><li class="chapter-item expanded affix "><li class="part-title">System Services</li><li class="chapter-item expanded "><a href="ssh.html"><strong aria-hidden="true">5.</strong> SSH</a></li><li class="chapter-item expanded "><a href="firewalld.html"><strong aria-hidden="true">6.</strong> firewalld</a></li><li class="chapter-item expanded "><a href="apt.html"><strong aria-hidden="true">7.</strong> APT</a></li><li class="chapter-item expanded "><a href="podman.html"><strong aria-hidden="true">8.</strong> Podman</a></li><li class="chapter-item expanded "><a href="traefik.html"><strong aria-hidden="true">9.</strong> Traefik</a></li><li class="chapter-item expanded "><a href="cockpit.html"><strong aria-hidden="true">10.</strong> Cockpit</a></li><li class="chapter-item expanded affix "><li class="part-title">Applications</li><li class="chapter-item expanded "><a href="gitea.html"><strong aria-hidden="true">11.</strong> Gitea</a></li><li class="chapter-item expanded "><a href="dex.html"><strong aria-hidden="true">12.</strong> Dex</a></li><li class="chapter-item expanded "><a href="liwasc.html"><strong aria-hidden="true">13.</strong> liwasc</a></li><li class="chapter-item expanded "><a href="bofied.html"><strong aria-hidden="true">14.</strong> bofied</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -134,8 +134,11 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="sd-card"><a class="header" href="#sd-card">SD Card</a></h1>
+                        <h1 id="linux"><a class="header" href="#linux">Linux</a></h1>
+<h2 id="debian"><a class="header" href="#debian">Debian</a></h2>
+<blockquote>
 <p>Debian, also known as Debian GNU/Linux, is a GNU/Linux distribution composed of free and open-source software, developed by the community-supported Debian Project, which was established by Ian Murdock on August 16, 1993<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
+</blockquote>
 <p>First, download and flash a prebuilt vanilla Debian image for your Raspberry Pi model:</p>
 <pre><code class="language-shell"># Raspberry Pi Zero (W)/1
 curl -L 'https://raspi.debian.net/tested/20220121_raspi_1_bullseye.img.xz' | xzcat &gt;/tmp/debian.img
@@ -145,17 +148,42 @@ curl -L 'https://raspi.debian.net/tested/20220121_raspi_2_bullseye.img.xz' | xzc
 curl -L 'https://raspi.debian.net/tested/20220121_raspi_3_bullseye.img.xz' | xzcat &gt;/tmp/debian.img
 # Raspberry Pi 4/400
 curl -L 'https://raspi.debian.net/tested/20220121_raspi_4_bullseye.img.xz' | xzcat &gt;/tmp/debian.img
+
+sudo umount /dev/mmcblk0{,p0,p1,p2}
+
+sudo dd if=/tmp/debian.img of=/dev/mmcblk0 bs=4M status=progress
+
+sync
+sudo umount /dev/mmcblk0{,p0,p1,p2}
 </code></pre>
-<p>Alternatively, you may want to download and flash Raspbian instead of vanilla Debian by using the <a href="https://flathub.org/apps/details/org.raspberrypi.rpi-imager">Raspberry Pi Imager</a>.</p>
-<p>For vanilla Debian, you can now mount the SD card and set the root password, add your <code>authorized_keys</code> and set the hostname like so:</p>
-<pre><code class="language-shell">
+<p>For vanilla Debian, you can now mount the SD card and set the root password to a random string, add your <code>authorized_keys</code> and set the hostname like so:</p>
+<blockquote>
+<p>Adjust <code>/dev/mmcblk0</code> to the path of your SD card.</p>
+</blockquote>
+<pre><code class="language-shell">sudo umount /dev/mmcblk0{,p0,p1,p2}
+
+sudo mkdir -p /mnt/raspi-boot
+sudo mount /dev/mmcblk0p1 /mnt/raspi-boot
+
+sudo tee /mnt/raspi-boot/sysconf.txt&lt;&lt;EOT
+root_pw=$(openssl rand -base64 12)
+root_authorized_key=$(cat ~/.ssh/id_rsa.pub)
+hostname=jeans-box
+EOT
+
+sync
+sudo umount /dev/mmcblk0{,p0,p1,p2}
 </code></pre>
-<!--Don't forget to add the empty `ssh` file to enable the SSH server -->
-<p>If you chose Raspbian, you can do the same like so:</p>
-<pre><code class="language-shell">
-</code></pre>
+<h2 id="raspbian"><a class="header" href="#raspbian">Raspbian</a></h2>
+<blockquote>
+<p>Raspberry Pi OS (formerly Raspbian) is a Debian-based operating system for Raspberry Pi<sup class="footnote-reference"><a href="#note2">2</a></sup>.</p>
+</blockquote>
+<p>Alternatively, you may want to download and flash Raspbian instead of vanilla Debian by using the <a href="https://flathub.org/apps/details/org.raspberrypi.rpi-imager">Raspberry Pi Imager</a>. You can set the options mentioned above using the imager GUI; don't configure WLAN using it, as we'll use a static method instead.</p>
 <div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
 <p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Debian">https://en.wikipedia.org/wiki/Debian</a>)</p>
+</div>
+<div class="footnote-definition" id="note2"><sup class="footnote-definition-label">2</sup>
+<p>From Wikipedia, last checked 2022-03-07 (<a href="https://en.wikipedia.org/wiki/Raspberry_Pi_OS">https://en.wikipedia.org/wiki/Raspberry_Pi_OS</a>)</p>
 </div>
 
                     </main>
