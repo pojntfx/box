@@ -2,11 +2,15 @@
 
 [Introduction](README.md)
 
-# System
+# Base System
 
-- [Debian](./debian.md)
-- [Network](./network.md)
-- [User](./user.md)
+- [SD Card](./sd_card.md)
+- [Wireless Networking](./wireless_networking.md)
+- [Wired Networking](./wired_networking.md)
+- [DNS](./dns.md)
+
+# System Services
+
 - [SSH](./ssh.md)
 - [firewalld](./firewalld.md)
 - [APT](./apt.md)
@@ -14,7 +18,7 @@
 - [Traefik](./traefik.md)
 - [Cockpit](./cockpit.md)
 
-# Services
+# Applications
 
 - [Gitea](./gitea.md)
 - [Dex](./dex.md)
