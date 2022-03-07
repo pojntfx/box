@@ -135,6 +135,68 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="wireless-networking"><a class="header" href="#wireless-networking">Wireless Networking</a></h1>
+<h2 id="debian"><a class="header" href="#debian">Debian</a></h2>
+<blockquote>
+<p>Adjust the IPv6 address, SSID and PSK to your own values.</p>
+</blockquote>
+<pre><code class="language-shell">sudo umount /dev/sda{,0,1,2}
+
+sudo mkdir -p /mnt/raspi-root
+sudo mount /dev/sda2 /mnt/raspi-root
+
+sudo tee /mnt/raspi-root/etc/network/interfaces.d/wlan0&lt;&lt;'EOT'
+allow-hotplug wlan0
+
+iface wlan0 inet dhcp
+
+iface wlan0 inet6 static
+    address 2003:ef:1f01:7f00:76c9:d842:c369:8bf2
+    autoconf 1
+    accept_ra 2
+
+    wpa-ssid myssid
+    wpa-psk mypsk
+EOT
+
+sync
+sudo umount /dev/sda{,0,1,2}
+</code></pre>
+<h2 id="raspbian"><a class="header" href="#raspbian">Raspbian</a></h2>
+<blockquote>
+<p>Adjust the IPv6 address, SSID and PSK to your own values.</p>
+</blockquote>
+<pre><code class="language-shell">sudo umount /dev/sda{,0,1,2}
+
+sudo mkdir -p /mnt/raspi-{boot,root}
+sudo mount /dev/sda1 /mnt/raspi-boot
+sudo mount /dev/sda2 /mnt/raspi-root
+
+sudo tee /mnt/raspi-boot/wpa_supplicant.conf&lt;&lt;'EOT'
+country=de
+update_config=1
+ctrl_interface=/var/run/wpa_supplicant
+
+network={
+    scan_ssid=1
+    ssid=&quot;myssid&quot;
+    psk=&quot;mypsk&quot;
+}
+EOT
+
+sudo tee /mnt/raspi-root/etc/network/interfaces.d/wlan0&lt;&lt;'EOT'
+allow-hotplug wlan0
+
+iface wlan0 inet dhcp
+
+iface wlan0 inet6 static
+    address 2003:ef:1f01:7f00:76c9:d842:c369:8bf2
+    autoconf 1
+    accept_ra 2
+EOT
+
+sync
+sudo umount /dev/sda{,0,1,2}
+</code></pre>
 
                     </main>
 
