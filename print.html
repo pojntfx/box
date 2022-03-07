@@ -304,6 +304,44 @@ sudo umount /dev/sda{,0,1,2}
 *.jeans-box 10800   IN  AAAA    2003:ef:1f01:7f00:76c9:d842:c369:8bf2
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ssh"><a class="header" href="#ssh">SSH</a></h1>
+<p>The Secure Shell Protocol (SSH) is a cryptographic network protocol for operating network services securely over an unsecured network<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
+<p>Access the server:</p>
+<pre><code class="language-shell"># Debian
+ssh root@jeans-box.alphahorizon.io
+# Raspbian
+ssh -tt pi@jeans-box.alphahorizon.io sudo su -l
+</code></pre>
+<p>Create the user:</p>
+<pre><code class="language-shell">echo &quot;LC_ALL=en_US.UTF-8&quot; | tee -a /etc/environment
+echo &quot;en_US.UTF-8 UTF-8&quot; | tee /etc/locale.gen
+echo &quot;LANG=en_US.UTF-8&quot; | tee /etc/locale.conf
+locale-gen en_US.UTF-8
+
+adduser jean
+su jean -c &quot;mkdir -m 700 -p ~/.ssh &amp;&amp; curl 'https://github.com/jean.keys' | tee -a ~/.ssh/authorized_keys &amp;&amp; chmod 600 ~/.ssh/authorized_keys&quot;
+usermod -aG sudo jean
+
+# Only on Raspbian: Delete the default `pi` user
+killall -u pi
+deluser --remove-home pi
+</code></pre>
+<p>Setup SSH:</p>
+<pre><code class="language-shell">apt update
+apt install -y sudo curl openssh-server locales
+systemctl enable --now ssh
+
+echo 'PermitRootLogin no' | tee /etc/ssh/ssh_config.d/no-root.conf
+
+passwd -d root
+passwd -l root
+chsh -s /sbin/nologin
+rm -f ~/.ssh/authorized_keys
+
+systemctl restart ssh
+</code></pre>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Secure_Shell">https://en.wikipedia.org/wiki/Secure_Shell</a>)</p>
+</div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="firewalld"><a class="header" href="#firewalld">firewalld</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="apt"><a class="header" href="#apt">APT</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="podman"><a class="header" href="#podman">Podman</a></h1>
