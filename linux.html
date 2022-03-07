@@ -140,6 +140,9 @@
 <p>Debian, also known as Debian GNU/Linux, is a GNU/Linux distribution composed of free and open-source software, developed by the community-supported Debian Project, which was established by Ian Murdock on August 16, 1993<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
 </blockquote>
 <p>First, download and flash a prebuilt vanilla Debian image for your Raspberry Pi model:</p>
+<blockquote>
+<p>Adjust <code>/dev/sda</code> to the path of your SD card.</p>
+</blockquote>
 <pre><code class="language-shell"># Raspberry Pi Zero (W)/1
 curl -L 'https://raspi.debian.net/tested/20220121_raspi_1_bullseye.img.xz' | xzcat &gt;/tmp/debian.img
 # Raspberry Pi 2
@@ -149,30 +152,27 @@ curl -L 'https://raspi.debian.net/tested/20220121_raspi_3_bullseye.img.xz' | xzc
 # Raspberry Pi 4/400
 curl -L 'https://raspi.debian.net/tested/20220121_raspi_4_bullseye.img.xz' | xzcat &gt;/tmp/debian.img
 
-sudo umount /dev/mmcblk0{,p0,p1,p2}
+sudo umount /dev/sda{,0,1,2}
 
-sudo dd if=/tmp/debian.img of=/dev/mmcblk0 bs=4M status=progress
+sudo dd if=/tmp/debian.img of=/dev/sda bs=4M status=progress
 
 sync
-sudo umount /dev/mmcblk0{,p0,p1,p2}
+sudo umount /dev/sda{,0,1,2}
 </code></pre>
 <p>For vanilla Debian, you can now mount the SD card and set the root password to a random string, add your <code>authorized_keys</code> and set the hostname like so:</p>
-<blockquote>
-<p>Adjust <code>/dev/mmcblk0</code> to the path of your SD card.</p>
-</blockquote>
-<pre><code class="language-shell">sudo umount /dev/mmcblk0{,p0,p1,p2}
+<pre><code class="language-shell">sudo umount /dev/sda{,0,1,2}
 
 sudo mkdir -p /mnt/raspi-boot
-sudo mount /dev/mmcblk0p1 /mnt/raspi-boot
+sudo mount /dev/sda1 /mnt/raspi-boot
 
-sudo tee /mnt/raspi-boot/sysconf.txt&lt;&lt;EOT
+sudo tee -a /mnt/raspi-boot/sysconf.txt&lt;&lt;EOT
 root_pw=$(openssl rand -base64 12)
 root_authorized_key=$(cat ~/.ssh/id_rsa.pub)
 hostname=jeans-box
 EOT
 
 sync
-sudo umount /dev/mmcblk0{,p0,p1,p2}
+sudo umount /dev/sda{,0,1,2}
 </code></pre>
 <h2 id="raspbian"><a class="header" href="#raspbian">Raspbian</a></h2>
 <blockquote>
@@ -180,10 +180,8 @@ sudo umount /dev/mmcblk0{,p0,p1,p2}
 </blockquote>
 <p>Alternatively, you may want to download and flash Raspbian instead of vanilla Debian by using the <a href="https://flathub.org/apps/details/org.raspberrypi.rpi-imager">Raspberry Pi Imager</a>. You can set the options mentioned above using the imager GUI; don't configure WLAN using it, as we'll use a static method instead.</p>
 <div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
-<p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Debian">https://en.wikipedia.org/wiki/Debian</a>)</p>
-</div>
-<div class="footnote-definition" id="note2"><sup class="footnote-definition-label">2</sup>
-<p>From Wikipedia, last checked 2022-03-07 (<a href="https://en.wikipedia.org/wiki/Raspberry_Pi_OS">https://en.wikipedia.org/wiki/Raspberry_Pi_OS</a>)</p>
+<p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Debian">https://en.wikipedia.org/wiki/Debian</a>)
+<sup class="footnote-reference"><a href="#note2">2</a></sup>: From Wikipedia, last checked 2022-03-07 (<a href="https://en.wikipedia.org/wiki/Raspberry_Pi_OS">https://en.wikipedia.org/wiki/Raspberry_Pi_OS</a>)</p>
 </div>
 
                     </main>

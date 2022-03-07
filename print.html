@@ -150,6 +150,9 @@
 <p>Debian, also known as Debian GNU/Linux, is a GNU/Linux distribution composed of free and open-source software, developed by the community-supported Debian Project, which was established by Ian Murdock on August 16, 1993<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
 </blockquote>
 <p>First, download and flash a prebuilt vanilla Debian image for your Raspberry Pi model:</p>
+<blockquote>
+<p>Adjust <code>/dev/sda</code> to the path of your SD card.</p>
+</blockquote>
 <pre><code class="language-shell"># Raspberry Pi Zero (W)/1
 curl -L 'https://raspi.debian.net/tested/20220121_raspi_1_bullseye.img.xz' | xzcat &gt;/tmp/debian.img
 # Raspberry Pi 2
@@ -159,30 +162,27 @@ curl -L 'https://raspi.debian.net/tested/20220121_raspi_3_bullseye.img.xz' | xzc
 # Raspberry Pi 4/400
 curl -L 'https://raspi.debian.net/tested/20220121_raspi_4_bullseye.img.xz' | xzcat &gt;/tmp/debian.img
 
-sudo umount /dev/mmcblk0{,p0,p1,p2}
+sudo umount /dev/sda{,0,1,2}
 
-sudo dd if=/tmp/debian.img of=/dev/mmcblk0 bs=4M status=progress
+sudo dd if=/tmp/debian.img of=/dev/sda bs=4M status=progress
 
 sync
-sudo umount /dev/mmcblk0{,p0,p1,p2}
+sudo umount /dev/sda{,0,1,2}
 </code></pre>
 <p>For vanilla Debian, you can now mount the SD card and set the root password to a random string, add your <code>authorized_keys</code> and set the hostname like so:</p>
-<blockquote>
-<p>Adjust <code>/dev/mmcblk0</code> to the path of your SD card.</p>
-</blockquote>
-<pre><code class="language-shell">sudo umount /dev/mmcblk0{,p0,p1,p2}
+<pre><code class="language-shell">sudo umount /dev/sda{,0,1,2}
 
 sudo mkdir -p /mnt/raspi-boot
-sudo mount /dev/mmcblk0p1 /mnt/raspi-boot
+sudo mount /dev/sda1 /mnt/raspi-boot
 
-sudo tee /mnt/raspi-boot/sysconf.txt&lt;&lt;EOT
+sudo tee -a /mnt/raspi-boot/sysconf.txt&lt;&lt;EOT
 root_pw=$(openssl rand -base64 12)
 root_authorized_key=$(cat ~/.ssh/id_rsa.pub)
 hostname=jeans-box
 EOT
 
 sync
-sudo umount /dev/mmcblk0{,p0,p1,p2}
+sudo umount /dev/sda{,0,1,2}
 </code></pre>
 <h2 id="raspbian"><a class="header" href="#raspbian">Raspbian</a></h2>
 <blockquote>
@@ -190,14 +190,119 @@ sudo umount /dev/mmcblk0{,p0,p1,p2}
 </blockquote>
 <p>Alternatively, you may want to download and flash Raspbian instead of vanilla Debian by using the <a href="https://flathub.org/apps/details/org.raspberrypi.rpi-imager">Raspberry Pi Imager</a>. You can set the options mentioned above using the imager GUI; don't configure WLAN using it, as we'll use a static method instead.</p>
 <div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
-<p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Debian">https://en.wikipedia.org/wiki/Debian</a>)</p>
-</div>
-<div class="footnote-definition" id="note2"><sup class="footnote-definition-label">2</sup>
-<p>From Wikipedia, last checked 2022-03-07 (<a href="https://en.wikipedia.org/wiki/Raspberry_Pi_OS">https://en.wikipedia.org/wiki/Raspberry_Pi_OS</a>)</p>
+<p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Debian">https://en.wikipedia.org/wiki/Debian</a>)
+<sup class="footnote-reference"><a href="#note2">2</a></sup>: From Wikipedia, last checked 2022-03-07 (<a href="https://en.wikipedia.org/wiki/Raspberry_Pi_OS">https://en.wikipedia.org/wiki/Raspberry_Pi_OS</a>)</p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="wireless-networking"><a class="header" href="#wireless-networking">Wireless Networking</a></h1>
+<h2 id="debian-1"><a class="header" href="#debian-1">Debian</a></h2>
+<blockquote>
+<p>Adjust the IPv6 address, SSID and PSK to your own values.</p>
+</blockquote>
+<pre><code class="language-shell">sudo umount /dev/sda{,0,1,2}
+
+sudo mkdir -p /mnt/raspi-root
+sudo mount /dev/sda2 /mnt/raspi-root
+
+sudo tee /mnt/raspi-root/etc/network/interfaces.d/wlan0&lt;&lt;'EOT'
+allow-hotplug wlan0
+
+iface wlan0 inet dhcp
+
+iface wlan0 inet6 static
+    address 2003:ef:1f01:7f00:76c9:d842:c369:8bf2
+    autoconf 1
+    accept_ra 2
+
+    wpa-ssid myssid
+    wpa-psk mypsk
+EOT
+
+sync
+sudo umount /dev/sda{,0,1,2}
+</code></pre>
+<h2 id="raspbian-1"><a class="header" href="#raspbian-1">Raspbian</a></h2>
+<blockquote>
+<p>Adjust the IPv6 address, SSID and PSK to your own values.</p>
+</blockquote>
+<pre><code class="language-shell">sudo umount /dev/sda{,0,1,2}
+
+sudo mkdir -p /mnt/raspi-{boot,root}
+sudo mount /dev/sda1 /mnt/raspi-boot
+sudo mount /dev/sda2 /mnt/raspi-root
+
+sudo tee /mnt/raspi-boot/wpa_supplicant.conf&lt;&lt;'EOT'
+country=de
+update_config=1
+ctrl_interface=/var/run/wpa_supplicant
+
+network={
+    scan_ssid=1
+    ssid=&quot;myssid&quot;
+    psk=&quot;mypsk&quot;
+}
+EOT
+
+sudo tee /mnt/raspi-root/etc/network/interfaces.d/wlan0&lt;&lt;'EOT'
+allow-hotplug wlan0
+
+iface wlan0 inet dhcp
+
+iface wlan0 inet6 static
+    address 2003:ef:1f01:7f00:76c9:d842:c369:8bf2
+    autoconf 1
+    accept_ra 2
+EOT
+
+sync
+sudo umount /dev/sda{,0,1,2}
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="wired-networking"><a class="header" href="#wired-networking">Wired Networking</a></h1>
+<blockquote>
+<p>Adjust the IPv6 address to your own value.</p>
+</blockquote>
+<pre><code class="language-shell">sudo umount /dev/sda{,0,1,2}
+
+sudo mkdir -p /mnt/raspi-root
+sudo mount /dev/sda2 /mnt/raspi-root
+
+sudo tee /mnt/raspi-root/etc/network/interfaces.d/eth0&lt;&lt;'EOT'
+auto eth0
+
+iface eth0 inet dhcp
+
+iface eth0 inet6 static
+    address 2003:ef:1f01:7f00:76c9:d842:c369:8bf3
+    autoconf 1
+    accept_ra 2
+EOT
+
+sync
+sudo umount /dev/sda{,0,1,2}
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dns"><a class="header" href="#dns">DNS</a></h1>
+<pre><code class="language-shell">sudo umount /dev/sda{,0,1,2}
+
+sudo mkdir -p /mnt/raspi-root
+sudo mount /dev/sda2 /mnt/raspi-root
+
+sudo tee /mnt/raspi-root/etc/resolv.conf&lt;&lt;'EOT'
+nameserver 2606:4700:4700::1111
+nameserver 2606:4700:4700::1001
+EOT
+sudo chattr +i /mnt/raspi-root/etc/resolv.conf
+
+sudo sed -i /mnt/raspi-root/etc/hosts -e 's/\tlocalhost/\tlocalhost jeans-box/g'
+
+sync
+sudo umount /dev/sda{,0,1,2}
+</code></pre>
+<p>You can now also add the <code>AAAA</code> records for the device to your DNS zone:</p>
+<blockquote>
+<p>Adjust the IPv6 address to either the address you gave the wireless or wired network interface previously.</p>
+</blockquote>
+<pre><code class="language-dns">jeans-box   10800   IN  AAAA    2003:ef:1f01:7f00:76c9:d842:c369:8bf2
+*.jeans-box 10800   IN  AAAA    2003:ef:1f01:7f00:76c9:d842:c369:8bf2
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ssh"><a class="header" href="#ssh">SSH</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="firewalld"><a class="header" href="#firewalld">firewalld</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="apt"><a class="header" href="#apt">APT</a></h1>
