@@ -135,6 +135,26 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="firewalld"><a class="header" href="#firewalld">firewalld</a></h1>
+<p>firewalld is a firewall management tool for Linux operating systems<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
+<pre><code class="language-shell">ssh jean@jeans-box.alphahorizon.io
+
+sudo apt update
+sudo apt install -y firewalld
+
+sudo systemctl enable --now firewalld
+
+sudo firewall-cmd --zone=public --add-interface=wlan0 --permanent
+sudo firewall-cmd --zone=public --add-interface=eth0 --permanent
+
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --permanent --add-service=mdns
+sudo firewall-cmd --permanent --add-service=llmnr
+
+sudo firewall-cmd --reload
+</code></pre>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Firewalld">https://en.wikipedia.org/wiki/Firewalld</a>)</p>
+</div>
 
                     </main>
 
