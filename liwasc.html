@@ -135,6 +135,21 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="liwasc"><a class="header" href="#liwasc">liwasc</a></h1>
+<p>liwasc is a high-performance network and port scanner<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
+<pre><code class="language-shell">ssh jean@jeans-box.alphahorizon.io
+
+sudo mkdir -p /var/lib/liwasc
+
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net host --cap-add NET_RAW --ulimit nofile=16384:16384 -v /var/lib/liwasc:/root/.local/share/liwasc -e LIWASC_BACKEND_OIDCISSUER=https://dex.jeans-box.alphahorizon.io -e LIWASC_BACKEND_OIDCCLIENTID=liwasc -e LIWASC_BACKEND_DEVICENAME=eth0 -e LIWASC_BACKEND_PERIODICSCANCRONEXPRESSION='0 0 * * *' --name liwasc pojntfx/liwasc-backend
+sudo podman generate systemd --new liwasc | sudo tee /lib/systemd/system/liwasc.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now liwasc
+</code></pre>
+<p>Visit <a href="https://pojntfx.github.io/liwasc/">https://pojntfx.github.io/liwasc/</a> as we did before and use <code>wss://liwasc.jeans-box.alphahorizon.io/</code> as the backend URL (note the trailing slash!).</p>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p>From GitHub, last checked 2022-02-19 (<a href="https://github.com/pojntfx/liwasc">https://github.com/pojntfx/liwasc</a>)</p>
+</div>
 
                     </main>
 

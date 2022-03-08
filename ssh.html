@@ -142,6 +142,7 @@ ssh root@jeans-box.alphahorizon.io
 # Raspbian
 ssh -tt pi@jeans-box.alphahorizon.io sudo su -l
 </code></pre>
+<p>If your Raspberry Pi doesn't have a static IPv6 address, you can connect to it by using <code>jeans-box</code> instead of <code>jeans-box.alphahorizon.io</code>, e.g. by using <code>ssh root@jeans-box</code>, which uses mDNS to resolve the Raspberry Pi's address.</p>
 <p>Create the user:</p>
 <pre><code class="language-shell">echo &quot;LC_ALL=en_US.UTF-8&quot; | tee -a /etc/environment
 echo &quot;en_US.UTF-8 UTF-8&quot; | tee /etc/locale.gen

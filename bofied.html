@@ -135,6 +135,32 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="bofied"><a class="header" href="#bofied">bofied</a></h1>
+<p>bofied is a network boot server<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
+<pre><code class="language-shell">ssh jean@jeans-box.alphahorizon.io
+
+sudo mkdir -p /var/lib/bofied
+
+sudo podman run -d --restart=always --label &quot;io.containers.autoupdate=image&quot; --net host --cap-add NET_BIND_SERVICE -v /var/lib/bofied:/root/.local/share/bofied -e BOFIED_BACKEND_OIDCISSUER=https://dex.jeans-box.alphahorizon.io -e BOFIED_BACKEND_OIDCCLIENTID=bofied -e BOFIED_BACKEND_ADVERTISEDIP=143.198.37.173 --name bofied pojntfx/bofied-backend
+sudo podman generate systemd --new bofied | sudo tee /lib/systemd/system/bofied.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now bofied
+
+sudo firewall-cmd --permanent --add-port=67/udp
+sudo firewall-cmd --permanent --add-port=69/udp
+sudo firewall-cmd --permanent --add-port=4011/udp
+sudo firewall-cmd --reload
+</code></pre>
+<p>Visit <a href="https://pojntfx.github.io/bofied/">https://pojntfx.github.io/bofied/</a> and login using the following credentials:</p>
+<ul>
+<li>Backend URL: <code>https://bofied.jeans-box.alphahorizon.io/</code></li>
+<li>OIDC Issuer: <code>https://dex.jeans-box.alphahorizon.io</code></li>
+<li>OIDC Client ID: <code>bofied</code></li>
+<li>OIDC Redirect URL: <code>https://pojntfx.github.io/bofied/</code></li>
+</ul>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p>From GitHub, last checked 2022-02-19 (<a href="https://github.com/pojntfx/bofied">https://github.com/pojntfx/bofied</a>)</p>
+</div>
 
                     </main>
 

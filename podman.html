@@ -135,6 +135,27 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="podman"><a class="header" href="#podman">Podman</a></h1>
+<p>Podman is a daemonless container engine for developing, managing, and running OCI Containers on your Linux System<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
+<pre><code class="language-shell">ssh jean@jeans-box.alphahorizon.io
+
+echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/ /' | sudo tee /etc/apt/sources.list.d/libcontainers.list
+curl -L &quot;https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_11/Release.key&quot; | sudo apt-key add -
+
+sudo apt update
+sudo apt upgrade -y # Prevent conflicts with eventual prior Podman install from Debian repos
+sudo apt install -t Debian_11 -y podman
+
+echo 'unqualified-search-registries=[&quot;docker.io&quot;]' | sudo tee /etc/containers/registries.conf.d/docker.conf
+
+sudo systemctl unmask podman-auto-update.service
+sudo systemctl unmask podman-auto-update.timer
+
+sudo systemctl enable --now podman-auto-update.timer
+sudo systemctl enable --now podman-restart
+</code></pre>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p>From the Podman website, last checked 2022-02-19 (<a href="https://podman.io/">https://podman.io/</a>)</p>
+</div>
 
                     </main>
 
