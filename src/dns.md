@@ -9,6 +9,8 @@ sudo mount /dev/sda2 /mnt/raspi-root
 sudo tee /mnt/raspi-root/etc/resolv.conf<<'EOT'
 nameserver 2606:4700:4700::1111
 nameserver 2606:4700:4700::1001
+nameserver 1.1.1.1
+nameserver 1.0.0.1
 EOT
 sudo chattr +i /mnt/raspi-root/etc/resolv.conf
 
@@ -18,7 +20,7 @@ sync
 sudo umount /dev/sda{,0,1,2}
 ```
 
-You can now also add the `AAAA` records for the device to your DNS zone:
+You can now also add the `AAAA` records for the device to your DNS zone (assuming that you've chosen a static IPv6 address):
 
 > Adjust the IPv6 address to either the address you gave the wireless or wired network interface previously.
 

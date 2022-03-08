@@ -10,6 +10,7 @@ sudo umount /dev/sda{,0,1,2}
 sudo mkdir -p /mnt/raspi-root
 sudo mount /dev/sda2 /mnt/raspi-root
 
+# For a static IPv6 address
 sudo tee /mnt/raspi-root/etc/network/interfaces.d/wlan0<<'EOT'
 allow-hotplug wlan0
 
@@ -20,6 +21,17 @@ iface wlan0 inet6 static
     autoconf 1
     accept_ra 2
 
+    wpa-ssid myssid
+    wpa-psk mypsk
+EOT
+
+# For a dynamic IPv6 address
+sudo tee /mnt/raspi-root/etc/network/interfaces.d/wlan0<<'EOT'
+allow-hotplug wlan0
+
+iface wlan0 inet dhcp
+
+iface wlan0 inet6 auto
     wpa-ssid myssid
     wpa-psk mypsk
 EOT
@@ -51,6 +63,7 @@ network={
 }
 EOT
 
+# For a static IPv6 address
 sudo tee /mnt/raspi-root/etc/network/interfaces.d/wlan0<<'EOT'
 allow-hotplug wlan0
 
@@ -60,6 +73,15 @@ iface wlan0 inet6 static
     address 2003:ef:1f01:7f00:76c9:d842:c369:8bf2
     autoconf 1
     accept_ra 2
+EOT
+
+# For a dynamic IPv6 address
+sudo tee /mnt/raspi-root/etc/network/interfaces.d/wlan0<<'EOT'
+allow-hotplug wlan0
+
+iface wlan0 inet dhcp
+
+iface wlan0 inet6 auto
 EOT
 
 sync
