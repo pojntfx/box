@@ -135,6 +135,27 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="apt"><a class="header" href="#apt">APT</a></h1>
+<p>Advanced package tool, or APT, is a free-software user interface that works with core libraries to handle the installation and removal of software on Debian, and Debian-based Linux distributions<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
+<pre><code class="language-shell">ssh jean@jeans-box.alphahorizon.io
+
+sudo apt update
+sudo apt install -y unattended-upgrades
+
+sudo tee /etc/apt/apt.conf.d/50unattended-upgrades &lt;&lt;'EOT'
+Unattended-Upgrade::Origins-Pattern {
+  &quot;origin=*&quot;;
+}
+Unattended-Upgrade::Automatic-Reboot &quot;true&quot;;
+Unattended-Upgrade::Automatic-Reboot-Time &quot;02:00&quot;;
+EOT
+
+sudo systemctl enable --now unattended-upgrades
+
+sudo unattended-upgrades --debug
+</code></pre>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/APT_(software)">https://en.wikipedia.org/wiki/APT_(software)</a>)</p>
+</div>
 
                     </main>
 

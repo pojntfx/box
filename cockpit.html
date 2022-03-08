@@ -135,6 +135,18 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="cockpit"><a class="header" href="#cockpit">Cockpit</a></h1>
+<p>Cockpit is a web-based graphical interface for servers<sup class="footnote-reference"><a href="#note">1</a></sup>.</p>
+<pre><code class="language-shell">ssh jean@jeans-box.alphahorizon.io
+
+echo 'deb http://deb.debian.org/debian bullseye-backports main' | sudo tee /etc/apt/sources.list.d/backports.list
+sudo apt update
+sudo apt install -t bullseye-backports -y cockpit cockpit-podman cockpit-pcp
+
+curl https://cockpit.jeans-box.alphahorizon.io/ # Test Cockpit
+</code></pre>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p>From the Cockpit website, last checked 2022-02-19 (<a href="https://cockpit-project.org/">https://cockpit-project.org/</a>)</p>
+</div>
 
                     </main>
 
