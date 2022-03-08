@@ -11,6 +11,8 @@ ssh root@jeans-box.alphahorizon.io
 ssh -tt pi@jeans-box.alphahorizon.io sudo su -l
 ```
 
+If your Raspberry Pi doesn't have a static IPv6 address, you can connect to it by using `jeans-box` instead of `jeans-box.alphahorizon.io`, e.g. by using `ssh root@jeans-box`, which uses mDNS to resolve the Raspberry Pi's address.
+
 Create the user:
 
 ```shell
