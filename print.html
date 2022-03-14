@@ -357,22 +357,23 @@ su jean -c &quot;mkdir -m 700 -p ~/.ssh &amp;&amp; curl 'https://github.com/jean
 usermod -aG sudo jean
 
 # Only on Raspbian: Delete the default `pi` user
-killall -u pi
-deluser --remove-home pi
+sh -c 'killall -u pi &amp;&amp; deluser --remove-home pi'
 </code></pre>
 <p>Setup SSH:</p>
-<pre><code class="language-shell">apt update
-apt install -y sudo curl openssh-server locales
-systemctl enable --now ssh
+<pre><code class="language-shell">ssh jean@jeans-box.alphahorizon.io
 
-echo 'PermitRootLogin no' | tee /etc/ssh/ssh_config.d/no-root.conf
+sudo apt update
+sudo apt install -y sudo curl openssh-server locales
+sudo systemctl enable --now ssh
 
-passwd -d root
-passwd -l root
-chsh -s /sbin/nologin
-rm -f ~/.ssh/authorized_keys
+echo 'PermitRootLogin no' | sudo tee /etc/ssh/ssh_config.d/no-root.conf
 
-systemctl restart ssh
+sudo passwd -d root
+sudo passwd -l root
+sudo chsh -s /sbin/nologin
+sudo rm -f ~/.ssh/authorized_keys
+
+sudo systemctl restart ssh
 </code></pre>
 <div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
 <p>From Wikipedia, last checked 2022-02-19 (<a href="https://en.wikipedia.org/wiki/Secure_Shell">https://en.wikipedia.org/wiki/Secure_Shell</a>)</p>
