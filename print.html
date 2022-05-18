@@ -138,7 +138,7 @@
                         <h1 id="box"><a class="header" href="#box">Box</a></h1>
 <p>Setup for my personal (pet) server.</p>
 <h2 id="contributing"><a class="header" href="#contributing">Contributing</a></h2>
-<p><strong>Found an error or have a suggestion?</strong> Please open an issue on GitHub (<a href="https://github.com/pojntfx/box">github.com/pojntfx/box</a>):</p>
+<p><strong>Found an error or have a suggestion?</strong> Please open an issue on GitHub (<a href="https://github.com/pojntfx/box">github.com/pojntfx/box</a>)!</p>
 <p>If you like the docs, a GitHub star is always appreciated :)</p>
 <h2 id="license"><a class="header" href="#license">License</a></h2>
 <p><img src="https://www.gnu.org/graphics/agplv3-155x51.png" alt="AGPL-3.0 license badge" /></p>
@@ -431,6 +431,7 @@ curl -L &quot;https://download.opensuse.org/repositories/devel:/kubic:/libcontai
 sudo apt update
 sudo apt upgrade -y # Prevent conflicts with eventual prior Podman install from Debian repos
 sudo apt install -t Debian_11 -y podman
+sudo apt install -y containernetworking-plugins
 
 echo 'unqualified-search-registries=[&quot;docker.io&quot;]' | sudo tee /etc/containers/registries.conf.d/docker.conf
 
@@ -485,8 +486,6 @@ certificatesResolvers:
 
 log:
   level: INFO
-
-metrics: {}
 EOT
 
 sudo tee /etc/traefik/services.yaml&lt;&lt;'EOT'
