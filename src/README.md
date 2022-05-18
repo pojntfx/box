@@ -4,7 +4,7 @@ Setup for my personal (pet) server.
 
 ## Contributing
 
-**Found an error or have a suggestion?** Please open an issue on GitHub ([github.com/pojntfx/box](https://github.com/pojntfx/box)):
+**Found an error or have a suggestion?** Please open an issue on GitHub ([github.com/pojntfx/box](https://github.com/pojntfx/box))!
 
 If you like the docs, a GitHub star is always appreciated :)
 

@@ -43,8 +43,6 @@ certificatesResolvers:
 
 log:
   level: INFO
-
-metrics: {}
 EOT
 
 sudo tee /etc/traefik/services.yaml<<'EOT'

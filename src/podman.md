@@ -11,6 +11,7 @@ curl -L "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:
 sudo apt update
 sudo apt upgrade -y # Prevent conflicts with eventual prior Podman install from Debian repos
 sudo apt install -t Debian_11 -y podman
+sudo apt install -y containernetworking-plugins
 
 echo 'unqualified-search-registries=["docker.io"]' | sudo tee /etc/containers/registries.conf.d/docker.conf
 
