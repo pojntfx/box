@@ -168,7 +168,7 @@ echo 'PermitRootLogin no' | sudo tee /etc/ssh/ssh_config.d/no-root.conf
 sudo passwd -d root
 sudo passwd -l root
 sudo chsh -s /sbin/nologin
-sudo rm -f ~/.ssh/authorized_keys
+sudo rm -f /root/.ssh/authorized_keys
 
 sudo systemctl restart ssh
 </code></pre>
